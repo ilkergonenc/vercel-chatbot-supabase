@@ -7,7 +7,18 @@
   ],
   "formatter": {
     "indentStyle": "space",
-    "indentWidth": 2
+    "indentWidth": 2,
+    "lineEnding": "crlf"
+  },
+  "css": {
+    "formatter": {
+      "lineEnding": "crlf"
+    }
+  },
+  "json": {
+    "formatter": {
+      "lineEnding": "crlf"
+    }
   },
   "files": {
     "includes": [
@@ -33,7 +44,6 @@
         "useConsistentTypeDefinitions": "off"
       },
       "nursery": {
-        "noUnnecessaryConditions": "off",
         "useSortedClasses": "off"
       },
       "complexity": {
