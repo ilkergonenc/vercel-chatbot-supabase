@@ -2,9 +2,8 @@
 
 import { z } from "zod";
 
-import { createUser, getUser } from "@/lib/db/queries";
-
-import { signIn } from "./auth";
+import { createSessionForSupabaseUser } from "@/lib/auth/session";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 const authFormSchema = z.object({
   email: z.string().email(),
@@ -25,11 +24,17 @@ export const login = async (
       password: formData.get("password"),
     });
 
-    await signIn("credentials", {
+    const supabase = await createSupabaseServerClient();
+    const { data, error } = await supabase.auth.signInWithPassword({
       email: validatedData.email,
       password: validatedData.password,
-      redirect: false,
     });
+
+    if (error || !data.user) {
+      return { status: "failed" };
+    }
+
+    await createSessionForSupabaseUser(data.user);
 
     return { status: "success" };
   } catch (error) {
@@ -61,17 +66,34 @@ export const register = async (
       password: formData.get("password"),
     });
 
-    const [user] = await getUser(validatedData.email);
+    const supabase = await createSupabaseServerClient();
+    const {
+      data: { user: currentUser },
+    } = await supabase.auth.getUser();
 
-    if (user) {
-      return { status: "user_exists" } as RegisterActionState;
+    const { data, error } = currentUser?.is_anonymous
+      ? await supabase.auth.updateUser({
+          email: validatedData.email,
+          password: validatedData.password,
+        })
+      : await supabase.auth.signUp({
+          email: validatedData.email,
+          password: validatedData.password,
+        });
+
+    if (error) {
+      const message = error.message.toLowerCase();
+
+      return message.includes("already") || message.includes("registered")
+        ? { status: "user_exists" }
+        : { status: "failed" };
     }
-    await createUser(validatedData.email, validatedData.password);
-    await signIn("credentials", {
-      email: validatedData.email,
-      password: validatedData.password,
-      redirect: false,
-    });
+
+    if (!data.user) {
+      return { status: "failed" };
+    }
+
+    await createSessionForSupabaseUser(data.user);
 
     return { status: "success" };
   } catch (error) {
@@ -82,3 +104,8 @@ export const register = async (
     return { status: "failed" };
   }
 };
+
+export async function logout() {
+  const supabase = await createSupabaseServerClient();
+  await supabase.auth.signOut();
+}

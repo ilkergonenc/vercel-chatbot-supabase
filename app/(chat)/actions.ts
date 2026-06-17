@@ -2,10 +2,10 @@
 
 import { generateText, type UIMessage } from "ai";
 import { cookies } from "next/headers";
-import { auth } from "@/app/(auth)/auth";
 import type { VisibilityType } from "@/components/chat/visibility-selector";
 import { titlePrompt } from "@/lib/ai/prompts";
 import { getTitleModel } from "@/lib/ai/providers";
+import { auth } from "@/lib/auth/session";
 import {
   deleteMessagesByChatIdAfterTimestamp,
   getChatById,

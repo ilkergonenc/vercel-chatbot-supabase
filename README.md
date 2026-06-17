@@ -31,8 +31,8 @@
 - Data Persistence
   - [Supabase Postgres](https://supabase.com/database) with Drizzle ORM for saving chat history and user data
   - [Supabase Storage](https://supabase.com/storage) for public chat attachment uploads
-- [Auth.js](https://authjs.dev)
-  - Simple and secure authentication
+- [Supabase Auth](https://supabase.com/auth)
+  - Email/password accounts and anonymous guest sessions
 
 ## Model Providers
 
@@ -56,7 +56,9 @@ You will need to use the environment variables [defined in `.env.example`](.env.
 
 For Supabase Postgres, set `DATABASE_URL` for the app runtime and `DIRECT_DATABASE_URL` for Drizzle migrations. `POSTGRES_URL` is still accepted as a legacy fallback during migration.
 
-For Supabase Storage uploads, create a public bucket named `chat-attachments` or set `SUPABASE_STORAGE_BUCKET`. Set `NEXT_PUBLIC_SUPABASE_URL` and the server-only `SUPABASE_SERVICE_ROLE_KEY`; never expose the service role key to client code.
+For Supabase Auth, enable email/password sign-ins and anonymous sign-ins. Set `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
+
+For Supabase Storage uploads, create a public bucket named `chat-attachments` or set `SUPABASE_STORAGE_BUCKET`. Set the server-only `SUPABASE_SERVICE_ROLE_KEY`; never expose the service role key to client code.
 
 1. Install Vercel CLI: `npm i -g vercel`
 2. Link local instance with Vercel and GitHub accounts (creates `.vercel` directory): `vercel link`

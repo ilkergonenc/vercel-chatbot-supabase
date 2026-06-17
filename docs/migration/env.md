@@ -6,9 +6,9 @@ Do not add real secrets to the repository.
 
 | Variable | Current purpose |
 | --- | --- |
-| `AUTH_SECRET` | NextAuth JWT/session secret. |
 | `OPENAI_API_KEY` | Direct OpenAI provider key after Phase 1. |
-| `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL used for public Storage URLs after Phase 3. |
+| `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL used for auth clients and public Storage URLs after Phases 3-4. |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anon key used by browser and server SSR auth clients after Phase 4. |
 | `SUPABASE_SERVICE_ROLE_KEY` | Server-only key used by the upload route for Supabase Storage writes after Phase 3. Never expose this to client code. |
 | `SUPABASE_STORAGE_BUCKET` | Public Supabase Storage bucket for chat attachments. Defaults to `chat-attachments`. |
 | `DATABASE_URL` | Runtime Postgres connection string after Phase 2. Supabase pooled URLs are supported. |
@@ -41,7 +41,7 @@ Do not add real secrets to the repository.
 
 | Current variable | Action | Replacement |
 | --- | --- | --- |
-| `AUTH_SECRET` | Remove in Phase 4 | Supabase Auth cookies/session handling |
+| `AUTH_SECRET` | Removed in Phase 4 | Supabase Auth cookies/session handling |
 | `AI_GATEWAY_API_KEY` | Removed in Phase 1 | `OPENAI_API_KEY` |
 | `BLOB_READ_WRITE_TOKEN` | Removed in Phase 3 | `NEXT_PUBLIC_SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `SUPABASE_STORAGE_BUCKET` |
 | `POSTGRES_URL` | Keep as legacy fallback in Phase 2, remove in later cleanup after deployments use the new names | `DATABASE_URL`, `DIRECT_DATABASE_URL` |
@@ -71,7 +71,7 @@ Do not add real secrets to the repository.
 - `IS_DEMO=1` changes routing to `/demo` through `next.config.ts`; verify this mode separately if it is still used.
 - Do not rely on Vercel AI Gateway OIDC after Phase 1; direct OpenAI requires `OPENAI_API_KEY`.
 - Blob integration was replaced in Phase 3. Keep the old image host allowlist until historic Blob URLs no longer need to render.
-- Remove Auth.js secret only after Phase 4 is verified.
+- Supabase Auth replaced Auth.js in Phase 4. `AUTH_SECRET` is no longer required.
 - Build-time migrations currently run through `pnpm build` via `tsx lib/db/migrate`; ensure `DIRECT_DATABASE_URL`, `DATABASE_URL`, or legacy `POSTGRES_URL` is available in the build environment if migrations still run at build time.
 
 ## Supabase local vs hosted notes

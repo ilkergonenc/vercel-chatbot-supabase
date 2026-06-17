@@ -75,6 +75,68 @@ export async function createGuestUser() {
   }
 }
 
+export async function getUserById(id: string): Promise<User | null> {
+  try {
+    const [selectedUser] = await db
+      .select()
+      .from(user)
+      .where(eq(user.id, id))
+      .limit(1);
+
+    return selectedUser ?? null;
+  } catch (_error) {
+    throw new ChatbotError("bad_request:database", "Failed to get user by id");
+  }
+}
+
+export async function ensureUserProfile({
+  id,
+  email,
+  isAnonymous,
+  name,
+  image,
+}: {
+  id: string;
+  email: string | null;
+  isAnonymous: boolean;
+  name?: string | null;
+  image?: string | null;
+}) {
+  const profileEmail = email ?? `guest-${id}`;
+  const now = new Date();
+
+  try {
+    const [profile] = await db
+      .insert(user)
+      .values({
+        id,
+        email: profileEmail,
+        isAnonymous,
+        name,
+        image,
+        updatedAt: now,
+      })
+      .onConflictDoUpdate({
+        target: user.id,
+        set: {
+          email: profileEmail,
+          isAnonymous,
+          name,
+          image,
+          updatedAt: now,
+        },
+      })
+      .returning();
+
+    return profile;
+  } catch (_error) {
+    throw new ChatbotError(
+      "bad_request:database",
+      "Failed to ensure user profile"
+    );
+  }
+}
+
 export async function saveChat({
   id,
   userId,

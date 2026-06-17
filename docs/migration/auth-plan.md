@@ -1,6 +1,15 @@
 # Supabase Auth migration plan
 
-Do not implement auth changes until Phase 4. Auth changes must not be combined with provider, DB connection, or storage migration work.
+Phase 4 replaces Auth.js/NextAuth with Supabase Auth. Auth changes must not be combined with provider, DB connection, or storage migration work.
+
+## Phase 4 implementation decision
+
+- Use Supabase email/password auth for regular users.
+- Use Supabase anonymous auth for guest users.
+- Keep the existing `"User"` table as the app profile and ownership table.
+- For all new users, `"User".id` equals Supabase `auth.users.id`.
+- Existing local Auth.js users/data are disposable for this migration; no legacy user migration is implemented in Phase 4.
+- Keep `Chat.userId`, `Document.userId`, and `Suggestion.userId` unchanged.
 
 ## Current Auth.js files and flow
 
@@ -104,6 +113,8 @@ Auth utilities and constants:
 - Keep the app-owned `User` table as a profile/ownership table.
 - After Supabase sign-up, ensure a matching app profile row exists.
 - During sign-in, fetch or create the app profile row for the Supabase user.
+- Anonymous guest sign-in creates a Supabase anonymous user and a matching app profile row.
+- Registration from an anonymous session upgrades the current Supabase user so guest-owned chats/documents keep the same user ID.
 
 ## Server-side auth strategy with Next.js App Router
 
@@ -153,6 +164,7 @@ Option A: Supabase anonymous auth
 - Requires Supabase anonymous sign-ins to be enabled.
 - Needs app profile row creation for anonymous users.
 - Must decide how anonymous users upgrade to regular accounts.
+- Selected for Phase 4.
 
 Option B: Preserve app guest route behavior
 

@@ -37,7 +37,7 @@ Establish a known-good baseline before changing runtime behavior.
 
 Current app may need:
 
-- `AUTH_SECRET`
+- `AUTH_SECRET` before Phase 4
 - `AI_GATEWAY_API_KEY` outside Vercel
 - `BLOB_READ_WRITE_TOKEN`
 - `POSTGRES_URL`
@@ -173,7 +173,7 @@ Move the existing Drizzle/Postgres data layer to Supabase Postgres without chang
 - [ ] `pnpm db:migrate` succeeds against Supabase.
 - [ ] `pnpm check`
 - [ ] `pnpm build`
-- [ ] Register/login still works through current Auth.js flow.
+- [ ] Register/login still works through current auth flow.
 - [ ] Chat history save/read/delete works.
 - [ ] Document and suggestion persistence works.
 
@@ -293,7 +293,7 @@ Replace NextAuth credentials and guest sessions with Supabase Auth while preserv
 
 ### Environment variables
 
-- Remove: `AUTH_SECRET`
+- Removed: `AUTH_SECRET`
 - Add: `NEXT_PUBLIC_SUPABASE_URL`
 - Add: `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 - Add server-only key only if needed for admin migration scripts: `SUPABASE_SERVICE_ROLE_KEY`

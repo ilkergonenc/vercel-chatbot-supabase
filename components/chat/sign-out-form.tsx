@@ -1,6 +1,7 @@
 import Form from "next/form";
+import { redirect } from "next/navigation";
 
-import { signOut } from "@/app/(auth)/auth";
+import { logout } from "@/app/(auth)/actions";
 
 export const SignOutForm = () => {
   return (
@@ -8,9 +9,8 @@ export const SignOutForm = () => {
       action={async () => {
         "use server";
 
-        await signOut({
-          redirectTo: "/",
-        });
+        await logout();
+        redirect("/");
       }}
       className="w-full"
     >

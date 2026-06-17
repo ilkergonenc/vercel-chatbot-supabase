@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { auth } from "@/app/(auth)/auth";
+import { auth } from "@/lib/auth/session";
 import { getChatById, getVotesByChatId, voteMessage } from "@/lib/db/queries";
 import { ChatbotError } from "@/lib/errors";
 
