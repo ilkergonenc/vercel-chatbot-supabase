@@ -30,7 +30,7 @@
   - Component primitives from [Radix UI](https://radix-ui.com) for accessibility and flexibility
 - Data Persistence
   - [Supabase Postgres](https://supabase.com/database) with Drizzle ORM for saving chat history and user data
-  - [Vercel Blob](https://vercel.com/storage/blob) for efficient file storage
+  - [Supabase Storage](https://supabase.com/storage) for public chat attachment uploads
 - [Auth.js](https://authjs.dev)
   - Simple and secure authentication
 
@@ -55,6 +55,8 @@ You will need to use the environment variables [defined in `.env.example`](.env.
 > Note: You should not commit your `.env` file or it will expose secrets that will allow others to control access to your various AI and authentication provider accounts.
 
 For Supabase Postgres, set `DATABASE_URL` for the app runtime and `DIRECT_DATABASE_URL` for Drizzle migrations. `POSTGRES_URL` is still accepted as a legacy fallback during migration.
+
+For Supabase Storage uploads, create a public bucket named `chat-attachments` or set `SUPABASE_STORAGE_BUCKET`. Set `NEXT_PUBLIC_SUPABASE_URL` and the server-only `SUPABASE_SERVICE_ROLE_KEY`; never expose the service role key to client code.
 
 1. Install Vercel CLI: `npm i -g vercel`
 2. Link local instance with Vercel and GitHub accounts (creates `.vercel` directory): `vercel link`

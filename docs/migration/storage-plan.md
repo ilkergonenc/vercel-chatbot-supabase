@@ -1,11 +1,9 @@
 # Supabase Storage migration plan
 
-Do not implement storage changes until Phase 3.
+Phase 3 implements public Supabase Storage uploads. Do not add private bucket signed URL handling until a later hardening phase.
 
-## Current Vercel Blob usage
+## Previous Vercel Blob usage
 
-- Dependency: `@vercel/blob`
-- Env var: `BLOB_READ_WRITE_TOKEN`
 - Upload route: `app/(chat)/api/files/upload/route.ts`
 - Image host allowlist: `next.config.ts`
 - Client upload caller: `components/chat/multimodal-input.tsx`
@@ -22,8 +20,8 @@ Do not implement storage changes until Phase 3.
 - Reads multipart form field `file`.
 - Validates file.
 - Sanitizes original filename.
-- Uploads to Vercel Blob with `access: "public"`.
-- Returns Vercel Blob response data.
+- Uploads to a public Supabase Storage bucket.
+- Returns `{ url, pathname, contentType }`.
 
 ## File validation rules
 
@@ -84,6 +82,15 @@ Use a public bucket first to match Vercel Blob:
 - Return `getPublicUrl(...).data.publicUrl`.
 - Preserve `{ url, pathname, contentType }`.
 - Update `next.config.ts` remote patterns for the Supabase Storage host.
+- Keep the old Vercel Blob image host allowlist for historic messages that already store Blob URLs.
+
+## Phase 3 env vars
+
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `SUPABASE_SERVICE_ROLE_KEY`
+- `SUPABASE_STORAGE_BUCKET`, optional and defaults to `chat-attachments`
+
+`SUPABASE_SERVICE_ROLE_KEY` is server-only and must never be exposed to client code.
 
 ## Optional private bucket phase
 

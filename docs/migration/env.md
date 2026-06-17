@@ -8,7 +8,9 @@ Do not add real secrets to the repository.
 | --- | --- |
 | `AUTH_SECRET` | NextAuth JWT/session secret. |
 | `OPENAI_API_KEY` | Direct OpenAI provider key after Phase 1. |
-| `BLOB_READ_WRITE_TOKEN` | Vercel Blob upload token. |
+| `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL used for public Storage URLs after Phase 3. |
+| `SUPABASE_SERVICE_ROLE_KEY` | Server-only key used by the upload route for Supabase Storage writes after Phase 3. Never expose this to client code. |
+| `SUPABASE_STORAGE_BUCKET` | Public Supabase Storage bucket for chat attachments. Defaults to `chat-attachments`. |
 | `DATABASE_URL` | Runtime Postgres connection string after Phase 2. Supabase pooled URLs are supported. |
 | `DIRECT_DATABASE_URL` | Direct or session-pooler Postgres connection string for Drizzle migrations after Phase 2. |
 | `POSTGRES_URL` | Legacy runtime and migration Postgres fallback during the DB transition. |
@@ -41,7 +43,7 @@ Do not add real secrets to the repository.
 | --- | --- | --- |
 | `AUTH_SECRET` | Remove in Phase 4 | Supabase Auth cookies/session handling |
 | `AI_GATEWAY_API_KEY` | Removed in Phase 1 | `OPENAI_API_KEY` |
-| `BLOB_READ_WRITE_TOKEN` | Remove in Phase 3 | Supabase Storage variables |
+| `BLOB_READ_WRITE_TOKEN` | Removed in Phase 3 | `NEXT_PUBLIC_SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `SUPABASE_STORAGE_BUCKET` |
 | `POSTGRES_URL` | Keep as legacy fallback in Phase 2, remove in later cleanup after deployments use the new names | `DATABASE_URL`, `DIRECT_DATABASE_URL` |
 | `REDIS_URL` | Keep | No change |
 | `IS_DEMO` | Keep if demo mode remains | No direct Supabase replacement |
@@ -59,13 +61,16 @@ Do not add real secrets to the repository.
 - For Supabase local development, run the Supabase CLI stack and point `DATABASE_URL` / `DIRECT_DATABASE_URL` at the local Postgres instance.
 - For hosted Supabase, `DATABASE_URL` may use the transaction pooler; the runtime postgres client disables prepared statements with `prepare: false` for compatibility.
 - Prefer a direct or session-pooler URL for `DIRECT_DATABASE_URL`; migrations fall back to `DATABASE_URL` and then `POSTGRES_URL` only when needed.
+- For Supabase Storage, create a public bucket named `chat-attachments` or set `SUPABASE_STORAGE_BUCKET`.
+- The upload route uses `SUPABASE_SERVICE_ROLE_KEY` server-side only. Do not expose it to client code or use a `NEXT_PUBLIC_` prefix.
+- The Phase 3 bucket is public so existing message file parts can continue storing directly renderable URLs. Private buckets and signed URL refresh belong to later hardening.
 
 ## Vercel deployment notes
 
 - Configure env vars separately for Preview and Production.
 - `IS_DEMO=1` changes routing to `/demo` through `next.config.ts`; verify this mode separately if it is still used.
 - Do not rely on Vercel AI Gateway OIDC after Phase 1; direct OpenAI requires `OPENAI_API_KEY`.
-- Remove Blob integration only after Phase 3 is verified.
+- Blob integration was replaced in Phase 3. Keep the old image host allowlist until historic Blob URLs no longer need to render.
 - Remove Auth.js secret only after Phase 4 is verified.
 - Build-time migrations currently run through `pnpm build` via `tsx lib/db/migrate`; ensure `DIRECT_DATABASE_URL`, `DATABASE_URL`, or legacy `POSTGRES_URL` is available in the build environment if migrations still run at build time.
 
