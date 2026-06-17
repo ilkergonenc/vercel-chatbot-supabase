@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-const MODEL_BUTTON_REGEX = /Kimi|Codestral|Mistral|DeepSeek|GPT|Grok/i;
+const MODEL_BUTTON_REGEX = /GPT|o4-mini/i;
 
 test.describe("Model Selector", () => {
   test.beforeEach(async ({ page }) => {
@@ -33,9 +33,9 @@ test.describe("Model Selector", () => {
     await modelButton.click();
 
     const searchInput = page.getByPlaceholder("Search models...");
-    await searchInput.fill("Mistral");
+    await searchInput.fill("Mini");
 
-    await expect(page.getByText("Mistral Small").first()).toBeVisible();
+    await expect(page.getByText("GPT 4.1 Mini").first()).toBeVisible();
   });
 
   test("can close model selector by clicking outside", async ({ page }) => {
@@ -59,8 +59,8 @@ test.describe("Model Selector", () => {
       .first();
     await modelButton.click();
 
-    await expect(page.getByText("Mistral")).toBeVisible();
-    await expect(page.getByText("Moonshot")).toBeVisible();
+    await expect(page.getByText("Available")).toBeVisible();
+    await expect(page.getByText("GPT 4.1")).toBeVisible();
   });
 
   test("can select a different model", async ({ page }) => {
@@ -70,12 +70,12 @@ test.describe("Model Selector", () => {
       .first();
     await modelButton.click();
 
-    await page.getByText("Mistral Small").first().click();
+    await page.getByText("GPT 4.1 Mini").first().click();
 
     await expect(page.getByPlaceholder("Search models...")).not.toBeVisible();
 
     await expect(
-      page.locator("button").filter({ hasText: "Mistral Small" }).first()
+      page.locator("button").filter({ hasText: "GPT 4.1 Mini" }).first()
     ).toBeVisible();
   });
 });

@@ -1,8 +1,8 @@
 # AI provider migration plan
 
-Do not implement provider changes until Phase 1.
+Phase 1 implemented the provider change to direct OpenAI.
 
-## Current Gateway usage
+## Previous Gateway usage
 
 - `lib/ai/providers.ts`
   - Imports `gateway` from `ai`.
@@ -119,6 +119,13 @@ Use a static object keyed by OpenAI model ID. Keep `/api/models` response shape 
 
 - Remove: `AI_GATEWAY_API_KEY`
 - Add: `OPENAI_API_KEY`
+
+## Implementation notes
+
+- `@ai-sdk/openai` is used for direct OpenAI model construction.
+- The active model list is static and OpenAI-only: `gpt-4.1`, `gpt-4.1-mini`, `o4-mini`, and `gpt-4o-mini`.
+- Gateway model catalog and capability endpoint fetches were replaced with local capability metadata.
+- Gateway provider ordering and activation/credit-card handling were removed.
 
 ## Error handling changes
 

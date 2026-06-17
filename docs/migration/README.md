@@ -42,8 +42,8 @@ Auth is intentionally last because it changes identity, cookies, middleware beha
 
 | Phase | Scope | Status | Notes |
 | --- | --- | --- | --- |
-| Phase 0 | Baseline audit and tests | Not started | Run before any runtime changes. |
-| Phase 1 | Direct OpenAI provider | Not started | Keep streaming, tools, title generation, and model selection. |
+| Phase 0 | Baseline audit and tests | Complete | Static checks, DB check, and build pass; Playwright browser install is a local limitation. |
+| Phase 1 | Direct OpenAI provider | Complete | Uses `@ai-sdk/openai`, static OpenAI model metadata, and `OPENAI_API_KEY`. |
 | Phase 2 | Supabase Postgres | Not started | Keep Drizzle and existing schema as much as possible. |
 | Phase 3 | Supabase Storage | Not started | Start with public bucket to match Vercel Blob behavior. |
 | Phase 4 | Supabase Auth | Not started | Highest-risk phase; do not combine with other migrations. |

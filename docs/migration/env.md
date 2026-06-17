@@ -7,7 +7,7 @@ Do not add real secrets to the repository.
 | Variable | Current purpose |
 | --- | --- |
 | `AUTH_SECRET` | NextAuth JWT/session secret. |
-| `AI_GATEWAY_API_KEY` | Vercel AI Gateway key for non-Vercel deployments. |
+| `OPENAI_API_KEY` | Direct OpenAI provider key after Phase 1. |
 | `BLOB_READ_WRITE_TOKEN` | Vercel Blob upload token. |
 | `POSTGRES_URL` | Runtime and migration Postgres connection string. |
 | `REDIS_URL` | Redis connection for rate limiting and resumable streams. |
@@ -38,7 +38,7 @@ Do not add real secrets to the repository.
 | Current variable | Action | Replacement |
 | --- | --- | --- |
 | `AUTH_SECRET` | Remove in Phase 4 | Supabase Auth cookies/session handling |
-| `AI_GATEWAY_API_KEY` | Remove in Phase 1 | `OPENAI_API_KEY` |
+| `AI_GATEWAY_API_KEY` | Removed in Phase 1 | `OPENAI_API_KEY` |
 | `BLOB_READ_WRITE_TOKEN` | Remove in Phase 3 | Supabase Storage variables |
 | `POSTGRES_URL` | Replace or temporarily alias in Phase 2 | `DATABASE_URL`, `DIRECT_DATABASE_URL` |
 | `REDIS_URL` | Keep | No change |
