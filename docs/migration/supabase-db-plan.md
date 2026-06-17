@@ -26,14 +26,14 @@ Defined in `lib/db/schema.ts`:
 - `drizzle.config.ts`
   - Uses `schema: "./lib/db/schema.ts"`.
   - Outputs migrations to `./lib/db/migrations`.
-  - Reads `process.env.POSTGRES_URL`.
+  - Reads `DIRECT_DATABASE_URL`, then `DATABASE_URL`, then `POSTGRES_URL`.
 - `lib/db/queries.ts`
-  - Creates `postgres(process.env.POSTGRES_URL ?? "")`.
+  - Creates `postgres(process.env.DATABASE_URL ?? process.env.POSTGRES_URL ?? "", { prepare: false })`.
   - Wraps it with `drizzle(client)`.
   - Exports all app query helpers.
 - `lib/db/migrate.ts`
   - Loads `.env.local`.
-  - Skips if `POSTGRES_URL` is not defined.
+  - Skips if no database URL is defined.
   - Runs migrations from `./lib/db/migrations`.
 
 ## Current migration setup
@@ -47,11 +47,11 @@ Defined in `lib/db/schema.ts`:
 - Keep Drizzle and `postgres`.
 - Use `DATABASE_URL` for runtime app queries.
 - Use `DIRECT_DATABASE_URL` for migrations.
-- Allow a temporary fallback to `POSTGRES_URL` only during transition if useful.
+- Keep `POSTGRES_URL` as a temporary fallback during transition.
 
 Runtime:
 
-- If using Supabase transaction pooler, configure `postgres(url, { prepare: false })`.
+- Runtime config uses `postgres(url, { prepare: false })` for Supabase transaction pooler compatibility.
 - Keep query helpers centralized.
 
 Migrations:

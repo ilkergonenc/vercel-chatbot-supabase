@@ -9,7 +9,9 @@ Do not add real secrets to the repository.
 | `AUTH_SECRET` | NextAuth JWT/session secret. |
 | `OPENAI_API_KEY` | Direct OpenAI provider key after Phase 1. |
 | `BLOB_READ_WRITE_TOKEN` | Vercel Blob upload token. |
-| `POSTGRES_URL` | Runtime and migration Postgres connection string. |
+| `DATABASE_URL` | Runtime Postgres connection string after Phase 2. Supabase pooled URLs are supported. |
+| `DIRECT_DATABASE_URL` | Direct or session-pooler Postgres connection string for Drizzle migrations after Phase 2. |
+| `POSTGRES_URL` | Legacy runtime and migration Postgres fallback during the DB transition. |
 | `REDIS_URL` | Redis connection for rate limiting and resumable streams. |
 | `IS_DEMO` | Optional demo mode flag. Controls `basePath`, `NEXT_PUBLIC_BASE_PATH`, and demo model behavior. |
 | `NEXT_PUBLIC_BASE_PATH` | Injected by `next.config.ts` from `IS_DEMO`; used by client and server route URLs. Not necessarily declared in `.env.example`. |
@@ -40,7 +42,7 @@ Do not add real secrets to the repository.
 | `AUTH_SECRET` | Remove in Phase 4 | Supabase Auth cookies/session handling |
 | `AI_GATEWAY_API_KEY` | Removed in Phase 1 | `OPENAI_API_KEY` |
 | `BLOB_READ_WRITE_TOKEN` | Remove in Phase 3 | Supabase Storage variables |
-| `POSTGRES_URL` | Replace or temporarily alias in Phase 2 | `DATABASE_URL`, `DIRECT_DATABASE_URL` |
+| `POSTGRES_URL` | Keep as legacy fallback in Phase 2, remove in later cleanup after deployments use the new names | `DATABASE_URL`, `DIRECT_DATABASE_URL` |
 | `REDIS_URL` | Keep | No change |
 | `IS_DEMO` | Keep if demo mode remains | No direct Supabase replacement |
 | `NEXT_PUBLIC_BASE_PATH` | Keep generated | Injected by `next.config.ts` |
@@ -55,6 +57,8 @@ Do not add real secrets to the repository.
 - `PLAYWRIGHT`, `PLAYWRIGHT_TEST_BASE_URL`, and `CI_PLAYWRIGHT` cause the app to use test-environment behavior and mocked AI models.
 - For Supabase hosted development, use a separate dev project before touching production data.
 - For Supabase local development, run the Supabase CLI stack and point `DATABASE_URL` / `DIRECT_DATABASE_URL` at the local Postgres instance.
+- For hosted Supabase, `DATABASE_URL` may use the transaction pooler; the runtime postgres client disables prepared statements with `prepare: false` for compatibility.
+- Prefer a direct or session-pooler URL for `DIRECT_DATABASE_URL`; migrations fall back to `DATABASE_URL` and then `POSTGRES_URL` only when needed.
 
 ## Vercel deployment notes
 
@@ -63,7 +67,7 @@ Do not add real secrets to the repository.
 - Do not rely on Vercel AI Gateway OIDC after Phase 1; direct OpenAI requires `OPENAI_API_KEY`.
 - Remove Blob integration only after Phase 3 is verified.
 - Remove Auth.js secret only after Phase 4 is verified.
-- Build-time migrations currently run through `pnpm build` via `tsx lib/db/migrate`; ensure `DIRECT_DATABASE_URL` or equivalent is available in the build environment if migrations still run at build time.
+- Build-time migrations currently run through `pnpm build` via `tsx lib/db/migrate`; ensure `DIRECT_DATABASE_URL`, `DATABASE_URL`, or legacy `POSTGRES_URL` is available in the build environment if migrations still run at build time.
 
 ## Supabase local vs hosted notes
 
