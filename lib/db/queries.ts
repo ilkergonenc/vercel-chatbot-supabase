@@ -17,7 +17,6 @@ import postgres from "postgres";
 import type { ArtifactKind } from "@/components/chat/artifact";
 import type { VisibilityType } from "@/components/chat/visibility-selector";
 import { ChatbotError } from "../errors";
-import { generateUUID } from "../utils";
 import {
   type Chat,
   chat,
@@ -27,67 +26,13 @@ import {
   type Suggestion,
   stream,
   suggestion,
-  type User,
   user,
   vote,
 } from "./schema";
-import { generateHashedPassword } from "./utils";
 
 const databaseUrl = process.env.DATABASE_URL ?? process.env.POSTGRES_URL ?? "";
 const client = postgres(databaseUrl, { prepare: false });
 const db = drizzle(client);
-
-export async function getUser(email: string): Promise<User[]> {
-  try {
-    return await db.select().from(user).where(eq(user.email, email));
-  } catch (_error) {
-    throw new ChatbotError(
-      "bad_request:database",
-      "Failed to get user by email"
-    );
-  }
-}
-
-export async function createUser(email: string, password: string) {
-  const hashedPassword = generateHashedPassword(password);
-
-  try {
-    return await db.insert(user).values({ email, password: hashedPassword });
-  } catch (_error) {
-    throw new ChatbotError("bad_request:database", "Failed to create user");
-  }
-}
-
-export async function createGuestUser() {
-  const email = `guest-${Date.now()}`;
-  const password = generateHashedPassword(generateUUID());
-
-  try {
-    return await db.insert(user).values({ email, password }).returning({
-      id: user.id,
-      email: user.email,
-    });
-  } catch (_error) {
-    throw new ChatbotError(
-      "bad_request:database",
-      "Failed to create guest user"
-    );
-  }
-}
-
-export async function getUserById(id: string): Promise<User | null> {
-  try {
-    const [selectedUser] = await db
-      .select()
-      .from(user)
-      .where(eq(user.id, id))
-      .limit(1);
-
-    return selectedUser ?? null;
-  } catch (_error) {
-    throw new ChatbotError("bad_request:database", "Failed to get user by id");
-  }
-}
 
 export async function ensureUserProfile({
   id,

@@ -1,5 +1,7 @@
 # Migration roadmap
 
+Status: Phases 1-5 are complete. This roadmap is retained as historical implementation context and rollback reference.
+
 This roadmap is based on the current repository inspection. It is a stack/tool migration only. Do not redesign product logic.
 
 ## Phase 0: baseline audit and tests

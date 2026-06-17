@@ -54,11 +54,13 @@ You will need to use the environment variables [defined in `.env.example`](.env.
 
 > Note: You should not commit your `.env` file or it will expose secrets that will allow others to control access to your various AI and authentication provider accounts.
 
-For Supabase Postgres, set `DATABASE_URL` for the app runtime and `DIRECT_DATABASE_URL` for Drizzle migrations. `POSTGRES_URL` is still accepted as a legacy fallback during migration.
+For Supabase Postgres, set `DATABASE_URL` for the app runtime and `DIRECT_DATABASE_URL` for Drizzle migrations.
 
 For Supabase Auth, enable email/password sign-ins and anonymous sign-ins. Set `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
 
 For Supabase Storage uploads, create a public bucket named `chat-attachments` or set `SUPABASE_STORAGE_BUCKET`. Set the server-only `SUPABASE_SERVICE_ROLE_KEY`; never expose the service role key to client code.
+
+Redis is used for rate limiting and resumable streams. Set `REDIS_URL` when those features are enabled in your environment.
 
 1. Install Vercel CLI: `npm i -g vercel`
 2. Link local instance with Vercel and GitHub accounts (creates `.vercel` directory): `vercel link`

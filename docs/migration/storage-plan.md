@@ -102,7 +102,7 @@ A private bucket improves access control but changes URL semantics:
 - Consider a dedicated attachment metadata table.
 - Do not rely on `Message_v2.attachments` without first changing write/read behavior; it is not currently populated with uploaded attachment metadata.
 
-This should be Phase 5 or later, not part of initial storage migration.
+This should be a later dedicated hardening phase, not part of the completed provider migration.
 
 ## RLS policy considerations
 

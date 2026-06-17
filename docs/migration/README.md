@@ -1,13 +1,21 @@
 # Migration index
 
-This directory prepares the Vercel Chatbot project for a provider migration while keeping the original application architecture and product behavior intact.
+This directory records the completed Vercel Chatbot provider migration while keeping the original application architecture and product behavior intact.
 
 Target migration:
 
-- Vercel AI Gateway to direct OpenAI via Vercel AI SDK
-- Neon/Postgres connection setup to Supabase Postgres while keeping Drizzle
-- Vercel Blob to Supabase Storage
-- Auth.js / NextAuth to Supabase Auth
+- Vercel AI Gateway to direct OpenAI via Vercel AI SDK: complete
+- Neon/Postgres connection setup to Supabase Postgres while keeping Drizzle: complete
+- Vercel Blob to Supabase Storage: complete
+- Auth.js / NextAuth to Supabase Auth: complete
+
+## Current stack
+
+- OpenAI through the AI SDK OpenAI provider
+- Supabase Auth with email/password and anonymous guest users
+- Supabase Storage public bucket for chat attachments
+- Supabase Postgres with Drizzle ORM
+- Redis for rate limiting and resumable streams
 
 ## Documents
 
@@ -44,10 +52,17 @@ Auth is intentionally last because it changes identity, cookies, middleware beha
 | --- | --- | --- | --- |
 | Phase 0 | Baseline audit and tests | Complete | Static checks, DB check, and build pass; Playwright browser install is a local limitation. |
 | Phase 1 | Direct OpenAI provider | Complete | Uses `@ai-sdk/openai`, static OpenAI model metadata, and `OPENAI_API_KEY`. |
-| Phase 2 | Supabase Postgres | Not started | Keep Drizzle and existing schema as much as possible. |
-| Phase 3 | Supabase Storage | Not started | Start with public bucket to match Vercel Blob behavior. |
-| Phase 4 | Supabase Auth | Not started | Highest-risk phase; do not combine with other migrations. |
-| Phase 5 | Cleanup and hardening | Not started | Remove old provider references after verification. |
+| Phase 2 | Supabase Postgres | Complete | Uses `DATABASE_URL` for runtime and `DIRECT_DATABASE_URL` for migrations while keeping Drizzle. |
+| Phase 3 | Supabase Storage | Complete | Uses a public bucket to preserve existing attachment URL behavior. |
+| Phase 4 | Supabase Auth | Complete | Uses Supabase Auth with anonymous guest users and app-owned profile rows. |
+| Phase 5 | Cleanup and hardening | Complete | Removed obsolete direct dependencies and synced final setup docs. |
+
+## Remaining optional work
+
+- Remove historical migration planning notes when they are no longer useful.
+- Consider private Supabase Storage in a separate design phase.
+- Remove the legacy `POSTGRES_URL` fallback after all deployments use `DATABASE_URL` and `DIRECT_DATABASE_URL`.
+- Remove old Vercel template marketplace references only if the project stops tracking upstream template positioning.
 
 ## Decision log
 

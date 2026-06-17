@@ -13,7 +13,6 @@ Do not add real secrets to the repository.
 | `SUPABASE_STORAGE_BUCKET` | Public Supabase Storage bucket for chat attachments. Defaults to `chat-attachments`. |
 | `DATABASE_URL` | Runtime Postgres connection string after Phase 2. Supabase pooled URLs are supported. |
 | `DIRECT_DATABASE_URL` | Direct or session-pooler Postgres connection string for Drizzle migrations after Phase 2. |
-| `POSTGRES_URL` | Legacy runtime and migration Postgres fallback during the DB transition. |
 | `REDIS_URL` | Redis connection for rate limiting and resumable streams. |
 | `IS_DEMO` | Optional demo mode flag. Controls `basePath`, `NEXT_PUBLIC_BASE_PATH`, and demo model behavior. |
 | `NEXT_PUBLIC_BASE_PATH` | Injected by `next.config.ts` from `IS_DEMO`; used by client and server route URLs. Not necessarily declared in `.env.example`. |
@@ -44,7 +43,7 @@ Do not add real secrets to the repository.
 | `AUTH_SECRET` | Removed in Phase 4 | Supabase Auth cookies/session handling |
 | `AI_GATEWAY_API_KEY` | Removed in Phase 1 | `OPENAI_API_KEY` |
 | `BLOB_READ_WRITE_TOKEN` | Removed in Phase 3 | `NEXT_PUBLIC_SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `SUPABASE_STORAGE_BUCKET` |
-| `POSTGRES_URL` | Keep as legacy fallback in Phase 2, remove in later cleanup after deployments use the new names | `DATABASE_URL`, `DIRECT_DATABASE_URL` |
+| `POSTGRES_URL` | Legacy fallback kept in code for compatibility, but removed from `.env.example` after Phase 5 | `DATABASE_URL`, `DIRECT_DATABASE_URL` |
 | `REDIS_URL` | Keep | No change |
 | `IS_DEMO` | Keep if demo mode remains | No direct Supabase replacement |
 | `NEXT_PUBLIC_BASE_PATH` | Keep generated | Injected by `next.config.ts` |
@@ -54,13 +53,13 @@ Do not add real secrets to the repository.
 ## Local development notes
 
 - Use `.env.local` for local secrets.
-- Keep old env vars until the phase that removes them has been implemented and verified.
+- Do not add removed migration-era env vars to new environments.
 - `NEXT_PUBLIC_BASE_PATH` is injected by `next.config.ts`; do not add it to `.env.local` unless intentionally overriding the current convention.
 - `PLAYWRIGHT`, `PLAYWRIGHT_TEST_BASE_URL`, and `CI_PLAYWRIGHT` cause the app to use test-environment behavior and mocked AI models.
 - For Supabase hosted development, use a separate dev project before touching production data.
 - For Supabase local development, run the Supabase CLI stack and point `DATABASE_URL` / `DIRECT_DATABASE_URL` at the local Postgres instance.
 - For hosted Supabase, `DATABASE_URL` may use the transaction pooler; the runtime postgres client disables prepared statements with `prepare: false` for compatibility.
-- Prefer a direct or session-pooler URL for `DIRECT_DATABASE_URL`; migrations fall back to `DATABASE_URL` and then `POSTGRES_URL` only when needed.
+- Prefer a direct or session-pooler URL for `DIRECT_DATABASE_URL`; migrations still have a legacy `POSTGRES_URL` fallback for older environments.
 - For Supabase Storage, create a public bucket named `chat-attachments` or set `SUPABASE_STORAGE_BUCKET`.
 - The upload route uses `SUPABASE_SERVICE_ROLE_KEY` server-side only. Do not expose it to client code or use a `NEXT_PUBLIC_` prefix.
 - The Phase 3 bucket is public so existing message file parts can continue storing directly renderable URLs. Private buckets and signed URL refresh belong to later hardening.
@@ -72,7 +71,7 @@ Do not add real secrets to the repository.
 - Do not rely on Vercel AI Gateway OIDC after Phase 1; direct OpenAI requires `OPENAI_API_KEY`.
 - Blob integration was replaced in Phase 3. Keep the old image host allowlist until historic Blob URLs no longer need to render.
 - Supabase Auth replaced Auth.js in Phase 4. `AUTH_SECRET` is no longer required.
-- Build-time migrations currently run through `pnpm build` via `tsx lib/db/migrate`; ensure `DIRECT_DATABASE_URL`, `DATABASE_URL`, or legacy `POSTGRES_URL` is available in the build environment if migrations still run at build time.
+- Build-time migrations currently run through `pnpm build` via `tsx lib/db/migrate`; ensure `DIRECT_DATABASE_URL` or `DATABASE_URL` is available in the build environment if migrations still run at build time.
 
 ## Supabase local vs hosted notes
 

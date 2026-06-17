@@ -11,7 +11,7 @@ Phase 4 replaces Auth.js/NextAuth with Supabase Auth. Auth changes must not be c
 - Existing local Auth.js users/data are disposable for this migration; no legacy user migration is implemented in Phase 4.
 - Keep `Chat.userId`, `Document.userId`, and `Suggestion.userId` unchanged.
 
-## Current Auth.js files and flow
+## Previous Auth.js files and flow
 
 - `app/(auth)/auth.ts`
   - Configures NextAuth v5.
@@ -38,7 +38,7 @@ Phase 4 replaces Auth.js/NextAuth with Supabase Auth. Auth changes must not be c
 - `app/(chat)/layout.tsx`
   - Calls `auth()` and passes `session.user` into the sidebar.
 
-## Current guest flow
+## Previous guest flow
 
 1. Request enters `proxy.ts`.
 2. If no NextAuth JWT exists, the request redirects to `/api/auth/guest`.
@@ -50,7 +50,7 @@ Phase 4 replaces Auth.js/NextAuth with Supabase Auth. Auth changes must not be c
 
 Risk: this can create many app-owned guest users, and guest ownership is tied to the session cookie.
 
-## Current session shape
+## Previous session shape
 
 Server and client code expects:
 
