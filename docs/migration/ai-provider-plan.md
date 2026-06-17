@@ -25,6 +25,8 @@ Do not implement provider changes until Phase 1.
   - Returns Gateway-derived model metadata.
 - `components/chat/shell.tsx`
   - Shows AI Gateway activation dialog.
+- `hooks/use-active-chat.tsx`
+  - Checks for AI Gateway credit-card/activation errors and toggles the activation alert.
 - `app/(auth)/layout.tsx`
   - Displays AI Gateway branding copy.
 - `lib/errors.ts`
@@ -43,9 +45,14 @@ Likely Phase 1 files:
 - `app/(chat)/actions.ts`
 - `app/(chat)/api/models/route.ts`
 - `components/chat/shell.tsx`
+- `hooks/use-active-chat.tsx`
 - `app/(auth)/layout.tsx`
 - `lib/errors.ts`
+- `tests/e2e/model-selector.test.ts`
+- `tests/pages/chat.ts`
 - `README.md`
+
+The model selector tests currently expect Gateway-era providers and model names such as Kimi, Mistral, DeepSeek, and Grok. They will need updates when the app uses a small OpenAI-only model list.
 
 ## Recommended OpenAI model list
 
@@ -116,6 +123,7 @@ Use a static object keyed by OpenAI model ID. Keep `/api/models` response shape 
 ## Error handling changes
 
 - Remove `bad_request:activate_gateway` and Gateway credit-card handling after no code references it.
+- Remove the Gateway activation alert path in `hooks/use-active-chat.tsx` and `components/chat/shell.tsx` after replacement error handling exists.
 - Add generic OpenAI/API-key error handling only if needed.
 - Avoid exposing raw provider errors to users.
 
@@ -126,3 +134,16 @@ Use a static object keyed by OpenAI model ID. Keep `/api/models` response shape 
 - No Gateway provider fallback routing.
 - No `gatewayOrder`.
 - Billing, rate limits, and model availability are direct OpenAI concerns.
+
+## Non-target Vercel utilities
+
+Do not automatically remove these just because they mention Vercel:
+
+- `@vercel/functions`
+- `@vercel/otel`
+- `@vercel/analytics`
+- `botid`
+- Vercel template links
+- `avatar.vercel.sh`
+
+These are separate from the requested AI Gateway migration unless explicitly removed in a later cleanup decision.

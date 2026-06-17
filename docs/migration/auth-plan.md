@@ -22,6 +22,8 @@ Do not implement auth changes until Phase 4. Auth changes must not be combined w
 - `proxy.ts`
   - Uses `getToken` from `next-auth/jwt`.
   - Redirects unauthenticated requests to `/api/auth/guest`.
+  - Uses a broad matcher including `/api/:path*` and a catch-all route.
+  - Manually exempts `/api/auth` from guest redirects.
 - `app/layout.tsx`
   - Wraps UI with `SessionProvider`.
 - `app/(chat)/layout.tsx`
@@ -127,7 +129,10 @@ Auth utilities and constants:
 - Replace `getToken` with Supabase session/cookie handling.
 - Keep `/ping` behavior.
 - Exclude Supabase auth callback routes if introduced.
+- Preserve or deliberately replace the current `/api/auth` exemption.
+- Account for the broad matcher: it includes `/api/:path*` and a catch-all that excludes only selected static assets.
 - Avoid redirect loops between `/login`, `/register`, guest creation, and root.
+- Avoid accidental API blocking for chat, history, upload, vote, document, suggestions, models, and future Supabase auth callback routes.
 - Decide whether unauthenticated visitors should be auto-anonymous or redirected.
 
 ## User ID mapping strategy
@@ -167,6 +172,7 @@ Option C: Remove automatic guest access
 - Supabase Auth users have separate IDs unless migration preserves them.
 - Anonymous session upgrade can orphan guest chats if not designed.
 - Middleware mistakes can make all API routes unauthorized or cause redirects.
+- The broad `proxy.ts` matcher can cause redirect loops or accidental API blocking if Supabase Auth cookie refresh and route exemptions are incomplete.
 
 ## Recommended staged implementation
 

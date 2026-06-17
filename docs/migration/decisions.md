@@ -14,6 +14,7 @@ These are default decisions for the migration. Change them only after inspecting
 - Replace Gateway dynamic model catalog with a small static OpenAI model list.
 - Migrate auth last.
 - Treat guest/anonymous auth as the highest-risk decision.
+- Keep non-target Vercel utilities unless explicitly removed later.
 
 ## Rationale
 
@@ -35,6 +36,11 @@ Keeping those boundaries reduces blast radius and makes rollback easier.
 | User ID mapping | Supabase `auth.users.id` should map to app `User.id` | Chat, document, suggestion, and stream ownership depend on user IDs. |
 | Storage privacy | Public first, private later | Current Vercel Blob behavior stores public URLs in messages. |
 | DB env naming | `DATABASE_URL` runtime and `DIRECT_DATABASE_URL` migrations | Supabase pooler and migration connections have different needs. |
+| Non-target Vercel utilities | Keep by default | `@vercel/functions`, `@vercel/otel`, `@vercel/analytics`, `botid`, template links, and `avatar.vercel.sh` are separate from Gateway/Blob/Neon/Auth.js. |
+
+## Storage persistence note
+
+Uploaded attachment URLs are currently persisted inside AI SDK message `parts` as `file` parts. The `Message_v2.attachments` column is currently written as `[]` in `app/(chat)/api/chat/route.ts`. Private storage or signed URL designs must account for this before changing URL persistence.
 
 ## Decision log
 

@@ -27,8 +27,10 @@ Establish a known-good baseline before changing runtime behavior.
 - Inspect current environment availability without printing secrets.
 - Run `pnpm install` if dependencies are missing.
 - Run `pnpm check`.
+- Run `pnpm db:check` if the database env is available and the command can connect safely.
 - Run `pnpm build` if required env vars are available.
 - Run Playwright with the current test setup if services and env vars are available.
+- Run the current model selector tests before Phase 1 to capture Gateway-era expectations.
 - Record failures as baseline issues, not migration regressions.
 
 ### Environment variables
@@ -45,8 +47,10 @@ Current app may need:
 
 - [ ] `git status --short` reviewed.
 - [ ] `pnpm check` result recorded.
+- [ ] Optional `pnpm db:check` result recorded or skipped with reason.
 - [ ] `pnpm build` result recorded or skipped with reason.
 - [ ] Playwright result recorded or skipped with reason.
+- [ ] Current model selector test behavior recorded before changing model providers.
 - [ ] Current chat, upload, auth, and DB behavior understood.
 
 ### Rollback notes
@@ -74,9 +78,12 @@ Replace Gateway model access with direct OpenAI provider usage while preserving 
 - `app/(chat)/api/chat/route.ts`
 - `app/(chat)/actions.ts`
 - `app/(chat)/api/models/route.ts`
+- `hooks/use-active-chat.tsx`
 - `lib/errors.ts`
 - `components/chat/shell.tsx`
 - `app/(auth)/layout.tsx`
+- `tests/e2e/model-selector.test.ts`
+- `tests/pages/chat.ts`
 - `README.md`
 
 ### Files that must not be changed
@@ -95,6 +102,8 @@ Replace Gateway model access with direct OpenAI provider usage while preserving 
 - Remove `providerOptions.gateway`.
 - Keep OpenAI provider options where supported.
 - Remove Gateway activation error copy and UI after direct OpenAI errors are handled.
+- Update `hooks/use-active-chat.tsx`, which currently checks for AI Gateway credit-card/activation errors and toggles the activation alert.
+- Update model selector tests because they currently expect Gateway-era providers/models such as Kimi, Mistral, DeepSeek, and Grok. They will need OpenAI-only expectations after the model list changes.
 
 ### Environment variables
 
@@ -120,6 +129,7 @@ Restore `lib/ai/providers.ts`, `lib/ai/models.ts`, Gateway provider options, and
 - Gateway model IDs do not map one-to-one to OpenAI model IDs.
 - Capability metadata must be accurate enough to avoid enabling unsupported tools or reasoning.
 - Gateway fallback/order behavior is lost.
+- Existing model selector tests encode Gateway-era model names and provider groups.
 
 ## Phase 2: Neon/Postgres connection to Supabase Postgres while keeping Drizzle
 
@@ -206,6 +216,7 @@ Replace Vercel Blob uploads with Supabase Storage while preserving the current a
 - Upload files to a path such as `{userId}/{timestamp-or-uuid}-{safeName}`.
 - Return `{ url, pathname, contentType }` to match current client expectations.
 - Update `next/image` remote patterns for the Supabase Storage public URL host.
+- Preserve the current persistence model: uploaded attachment URLs live in AI SDK message `parts` as `file` parts, while `Message_v2.attachments` is currently saved as `[]` in `app/(chat)/api/chat/route.ts`.
 
 ### Environment variables
 
@@ -233,6 +244,7 @@ Restore `@vercel/blob` upload route, Blob env var, and Blob image remote pattern
 
 - Public bucket matches current behavior but exposes URLs to anyone who has them.
 - Private bucket requires signed URL refresh logic because message parts currently store display URLs.
+- Private bucket design must account for the fact that the current `attachments` DB column is not the source of rendered attachments.
 - There is no current delete flow for uploaded files.
 
 ## Phase 4: Auth.js/NextAuth to Supabase Auth
@@ -277,6 +289,7 @@ Replace NextAuth credentials and guest sessions with Supabase Auth while preserv
 - Replace middleware token checks with Supabase cookie/session handling.
 - Decide and implement anonymous/guest behavior in a dedicated sub-step.
 - Map app-owned `"User"` rows to Supabase `auth.users.id`.
+- Handle `proxy.ts` carefully: it has a broad matcher including `/api/:path*` and a catch-all route, while `/api/auth` is manually exempted. Supabase Auth middleware must avoid redirect loops and accidental API blocking.
 
 ### Environment variables
 
@@ -306,6 +319,7 @@ Rollback is complex after user identity changes. Keep this phase isolated on its
 - User ID mapping can break chat and document ownership.
 - Current guest flow creates a DB user automatically; Supabase anonymous behavior must be chosen deliberately.
 - Middleware cookie refresh errors can cause redirect loops.
+- The broad proxy matcher can block APIs or static-like routes if exemptions are incomplete.
 - Client code currently depends on NextAuth loading/session semantics.
 
 ## Phase 5: cleanup, docs, hardening, optional private storage
@@ -357,3 +371,4 @@ Rollback individual cleanup commits if they remove something still referenced.
 
 - Removing packages before all references are gone can break builds.
 - Policy hardening can accidentally block valid uploads or reads.
+- Do not automatically remove Vercel-adjacent utilities such as `@vercel/functions`, `@vercel/otel`, `@vercel/analytics`, `botid`, Vercel template links, or `avatar.vercel.sh`; they are separate from the requested provider migration unless explicitly removed later.

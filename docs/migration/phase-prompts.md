@@ -7,7 +7,7 @@ Copy these prompts into future Codex sessions. Each phase should run on its own 
 ```text
 You are working in this local Vercel Chatbot clone. Do not redesign product logic. Do not implement provider, DB, storage, or auth changes yet.
 
-First inspect the repo, including AGENTS.md and docs/migration/*. Run a baseline audit for the migration. Check git status, inspect package.json, env examples, DB schema/migrations, auth files, storage upload route, AI provider files, middleware/proxy, and tests. Run safe verification commands: pnpm check, pnpm build if env vars are available, and Playwright if the local env can support it.
+First inspect the repo, including AGENTS.md and docs/migration/*. Run a baseline audit for the migration. Check git status, inspect package.json, env examples, DB schema/migrations, auth files, storage upload route, AI provider files, middleware/proxy, and tests. Run safe verification commands: pnpm check, optional pnpm db:check if the database env can connect safely, pnpm build if env vars are available, and Playwright if the local env can support it. Run the current model selector tests before Phase 1 to capture Gateway-era expectations.
 
 Keep diffs tiny and documentation-only unless I explicitly approve runtime changes. Record baseline findings and any skipped verification with reasons. Include rollback notes, even if no code changed. Do not make unrelated changes.
 ```
@@ -17,9 +17,9 @@ Keep diffs tiny and documentation-only unless I explicitly approve runtime chang
 ```text
 Implement Phase 1 only: migrate Vercel AI Gateway to direct OpenAI through the Vercel AI SDK. Do not redesign product logic. Do not change database, storage, or auth behavior.
 
-First inspect AGENTS.md, docs/migration/roadmap.md, docs/migration/ai-provider-plan.md, package.json, lib/ai/providers.ts, lib/ai/models.ts, app/(chat)/api/chat/route.ts, app/(chat)/actions.ts, app/(chat)/api/models/route.ts, lib/errors.ts, and any Gateway UI copy. Use small diffs.
+First inspect AGENTS.md, docs/migration/roadmap.md, docs/migration/ai-provider-plan.md, package.json, lib/ai/providers.ts, lib/ai/models.ts, app/(chat)/api/chat/route.ts, app/(chat)/actions.ts, app/(chat)/api/models/route.ts, hooks/use-active-chat.tsx, lib/errors.ts, tests/e2e/model-selector.test.ts, tests/pages/chat.ts, and any Gateway UI copy. Use small diffs.
 
-Preserve streaming, tool calling, chat persistence, title generation, and model selection. Replace Gateway dynamic catalog/capabilities with a small static OpenAI model list. Update env docs from AI_GATEWAY_API_KEY to OPENAI_API_KEY. Remove only Gateway-specific code that is actually replaced in this phase.
+Preserve streaming, tool calling, chat persistence, title generation, and model selection. Replace Gateway dynamic catalog/capabilities with a small static OpenAI model list. Update env docs from AI_GATEWAY_API_KEY to OPENAI_API_KEY. Update hooks/use-active-chat.tsx because it contains AI Gateway credit-card/activation alert handling. Update model selector tests because they currently expect Gateway-era providers/models. Remove only Gateway-specific code that is actually replaced in this phase.
 
 Run pnpm check and pnpm build if env vars are available. Manually verify or describe how to verify chat streaming and tools. Include rollback notes. Do not make unrelated changes.
 ```

@@ -60,6 +60,13 @@ The client stores attachments as:
 
 Message parts persist file URLs directly. This is why a public bucket is the safest first migration.
 
+Important persistence detail:
+
+- Persisted attachment URLs currently live in AI SDK message `parts` as `file` parts.
+- `Message_v2.attachments` is currently saved as `[]` in `app/(chat)/api/chat/route.ts`.
+- Rendered attachments come from `message.parts`, not from the `attachments` DB column.
+- This matters if private Supabase Storage is considered later because signed URLs expire and would need regeneration from stable storage metadata.
+
 ## Supabase bucket recommendation
 
 - Bucket name: `chat-attachments`
@@ -86,6 +93,7 @@ A private bucket improves access control but changes URL semantics:
 - Generate signed URLs when rendering messages.
 - Refresh signed URLs after expiry.
 - Consider a dedicated attachment metadata table.
+- Do not rely on `Message_v2.attachments` without first changing write/read behavior; it is not currently populated with uploaded attachment metadata.
 
 This should be Phase 5 or later, not part of initial storage migration.
 
@@ -110,6 +118,7 @@ Current messages store final image URLs. Public URLs remain stable. Signed URLs 
 
 - First migration should return stable public URLs.
 - Do not switch to signed URLs without changing persistence/rendering logic.
+- If private storage is later chosen, store stable bucket/path metadata separately from short-lived signed URLs.
 
 ## Cleanup/delete strategy
 

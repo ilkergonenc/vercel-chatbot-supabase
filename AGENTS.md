@@ -66,6 +66,7 @@ The current task track is a stack migration only. Keep the application behavior,
 - Auto-fix formatting/lint where appropriate: `pnpm fix`
 - Generate Drizzle migrations: `pnpm db:generate`
 - Run migrations: `pnpm db:migrate`
+- Check Drizzle schema/database state when configured: `pnpm db:check`
 - Build: `pnpm build`
 - Tests on Unix-like shells: `PLAYWRIGHT=True pnpm exec playwright test`
 - Tests on PowerShell: `$env:PLAYWRIGHT='True'; pnpm exec playwright test`
@@ -83,6 +84,7 @@ The current task track is a stack migration only. Keep the application behavior,
 ## Required verification after each phase
 
 - Run `pnpm check`.
+- Run `pnpm db:check` when the database env is available and the phase touches DB behavior.
 - Run `pnpm build` when environment variables and services are available.
 - Run targeted Playwright tests or document why they could not run.
 - Manually verify the affected route or UI flow.

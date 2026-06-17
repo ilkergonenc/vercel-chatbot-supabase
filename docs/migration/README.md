@@ -32,6 +32,12 @@ Target migration:
 
 Auth is intentionally last because it changes identity, cookies, middleware behavior, and ownership checks.
 
+## General warnings
+
+- Do not automatically remove `@vercel/functions`, `@vercel/otel`, `@vercel/analytics`, `botid`, Vercel template links, or `avatar.vercel.sh` just because they mention Vercel. They are separate from the requested provider migration unless explicitly removed later.
+- Before Phase 1, run the current model selector tests to capture Gateway-era provider/model expectations.
+- For storage, persisted attachment URLs currently live in AI SDK message `parts` as `file` parts. `Message_v2.attachments` is currently saved as `[]`.
+
 ## Current status
 
 | Phase | Scope | Status | Notes |
