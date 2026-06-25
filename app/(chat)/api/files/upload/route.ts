@@ -1,8 +1,12 @@
-import { createClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { auth } from "@/lib/auth/session";
+import {
+  attachmentBucketName,
+  createStorageClient,
+  getAttachmentUrl,
+} from "@/lib/supabase/storage";
 
 const FileSchema = z.object({
   file: z
@@ -14,24 +18,6 @@ const FileSchema = z.object({
       message: "File type should be JPEG or PNG",
     }),
 });
-
-const bucketName = process.env.SUPABASE_STORAGE_BUCKET ?? "chat-attachments";
-
-function createStorageClient() {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-  if (!(supabaseUrl && serviceRoleKey)) {
-    return null;
-  }
-
-  return createClient(supabaseUrl, serviceRoleKey, {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false,
-    },
-  });
-}
 
 export async function POST(request: Request) {
   const session = await auth();
@@ -77,7 +63,7 @@ export async function POST(request: Request) {
 
     try {
       const { error } = await storage.storage
-        .from(bucketName)
+        .from(attachmentBucketName)
         .upload(pathname, fileBuffer, {
           contentType: file.type,
           upsert: false,
@@ -87,10 +73,10 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: "Upload failed" }, { status: 500 });
       }
 
-      const { data } = storage.storage.from(bucketName).getPublicUrl(pathname);
+      const url = await getAttachmentUrl(pathname);
 
       return NextResponse.json({
-        url: data.publicUrl,
+        url,
         pathname,
         contentType: file.type,
       });

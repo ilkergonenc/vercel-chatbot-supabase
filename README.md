@@ -58,7 +58,9 @@ For Supabase Postgres, set `DATABASE_URL` for the app runtime and `DIRECT_DATABA
 
 For Supabase Auth, enable email/password sign-ins and anonymous sign-ins. Set `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
 
-For Supabase Storage uploads, create a public bucket named `chat-attachments` or set `SUPABASE_STORAGE_BUCKET`. Set the server-only `SUPABASE_SERVICE_ROLE_KEY`; never expose the service role key to client code.
+For Supabase Storage uploads, create a bucket named `chat-attachments` or set `SUPABASE_STORAGE_BUCKET`. Public buckets use `getPublicUrl` and require `NEXT_PUBLIC_SUPABASE_URL` to be an externally reachable HTTPS Supabase project URL. Private buckets are supported by setting `SUPABASE_STORAGE_SIGNED_URLS=true`; the chat API will generate signed URLs for OpenAI at request time. Set the server-only `SUPABASE_SERVICE_ROLE_KEY`; never expose the service role key to client code.
+
+BotId is optional. Set `BOTID_SECRET_KEY` only in environments where BotId checks should run.
 
 Redis is used for rate limiting and resumable streams. Set `REDIS_URL` when those features are enabled in your environment.
 

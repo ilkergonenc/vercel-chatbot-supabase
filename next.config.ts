@@ -34,6 +34,21 @@ const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
       {
+        protocol: "http",
+        hostname: "localhost",
+        port: "3000",
+      },
+      {
+        protocol: "http",
+        hostname: "localhost",
+        port: "3001",
+      },
+      {
+        protocol: "http",
+        hostname: "localhost",
+        port: "3333",
+      },
+      {
         hostname: "avatar.vercel.sh",
       },
       {
@@ -44,6 +59,11 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "*.supabase.co",
         pathname: "/storage/v1/object/public/**",
+      },
+      {
+        protocol: "https",
+        hostname: "*.supabase.co",
+        pathname: "/storage/v1/object/sign/**",
       },
     ],
   },
@@ -56,4 +76,6 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default withBotId(nextConfig);
+export default process.env.BOTID_SECRET_KEY
+  ? withBotId(nextConfig)
+  : nextConfig;

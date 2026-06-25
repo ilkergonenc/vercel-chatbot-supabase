@@ -7,7 +7,6 @@ import {
   stepCountIs,
   streamText,
 } from "ai";
-import { checkBotId } from "botid/server";
 import { after } from "next/server";
 import { createResumableStreamContext } from "resumable-stream";
 import { entitlementsByUserType } from "@/lib/ai/entitlements";
@@ -40,6 +39,7 @@ import {
 import type { DBMessage } from "@/lib/db/schema";
 import { ChatbotError } from "@/lib/errors";
 import { checkIpRateLimit } from "@/lib/ratelimit";
+import { resolveAttachmentUrlsForModel } from "@/lib/supabase/storage";
 import type { ChatMessage } from "@/lib/types";
 import { convertToUIMessages, generateUUID } from "@/lib/utils";
 import { generateTitleFromUserMessage } from "../../actions";
@@ -57,13 +57,75 @@ function getStreamContext() {
 
 export { getStreamContext };
 
+function redactAttachmentUrl(url: unknown) {
+  if (typeof url !== "string") {
+    return "[missing-url]";
+  }
+
+  try {
+    const parsedUrl = new URL(url);
+    parsedUrl.search = parsedUrl.search ? "?[redacted]" : "";
+    return parsedUrl.toString();
+  } catch (_) {
+    return "[invalid-url]";
+  }
+}
+
+function logInvalidChatRequestPayload(payload: unknown, cause: unknown) {
+  const parts =
+    typeof payload === "object" && payload !== null && "message" in payload
+      ? (payload as { message?: { parts?: unknown[] } }).message?.parts
+      : undefined;
+
+  const attachments = Array.isArray(parts)
+    ? parts
+        .filter(
+          (part): part is Record<string, unknown> =>
+            typeof part === "object" &&
+            part !== null &&
+            "type" in part &&
+            part.type === "file"
+        )
+        .map((part) => ({
+          mediaType: part.mediaType,
+          nameLength: typeof part.name === "string" ? part.name.length : null,
+          url: redactAttachmentUrl(part.url),
+        }))
+    : [];
+
+  console.warn("Invalid chat request payload", {
+    attachments,
+    cause,
+  });
+}
+
+async function checkBotIdIfConfigured() {
+  if (process.env.NODE_ENV !== "production" || !process.env.BOTID_SECRET_KEY) {
+    return null;
+  }
+
+  const { checkBotId } = await import("botid/server");
+  return checkBotId().catch(() => null);
+}
+
 export async function POST(request: Request) {
   let requestBody: PostRequestBody;
 
   try {
     const json = await request.json();
-    requestBody = postRequestBodySchema.parse(json);
-  } catch (_) {
+    const validatedRequestBody = postRequestBodySchema.safeParse(json);
+
+    if (!validatedRequestBody.success) {
+      logInvalidChatRequestPayload(json, validatedRequestBody.error.flatten());
+      return new ChatbotError(
+        "bad_request:api",
+        "Invalid chat request payload. Check attachment URL, name, and media type."
+      ).toResponse();
+    }
+
+    requestBody = validatedRequestBody.data;
+  } catch (error) {
+    logInvalidChatRequestPayload(null, error);
     return new ChatbotError("bad_request:api").toResponse();
   }
 
@@ -71,10 +133,7 @@ export async function POST(request: Request) {
     const { id, message, messages, selectedChatModel, selectedVisibilityType } =
       requestBody;
 
-    const [, session] = await Promise.all([
-      checkBotId().catch(() => null),
-      auth(),
-    ]);
+    const [, session] = await Promise.all([checkBotIdIfConfigured(), auth()]);
 
     if (!session?.user) {
       return new ChatbotError("unauthorized:chat").toResponse();
@@ -186,7 +245,8 @@ export async function POST(request: Request) {
     const isReasoningModel = capabilities?.reasoning === true;
     const supportsTools = capabilities?.tools === true;
 
-    const modelMessages = await convertToModelMessages(uiMessages);
+    const uiMessagesForModel = await resolveAttachmentUrlsForModel(uiMessages);
+    const modelMessages = await convertToModelMessages(uiMessagesForModel);
 
     const stream = createUIMessageStream({
       originalMessages: isToolApprovalFlow ? uiMessages : undefined,

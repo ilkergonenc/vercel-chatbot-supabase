@@ -13,7 +13,7 @@ Target migration:
 
 - OpenAI through the AI SDK OpenAI provider
 - Supabase Auth with email/password and anonymous guest users
-- Supabase Storage public bucket for chat attachments
+- Supabase Storage for chat attachments, using public URLs by default or signed URLs when configured
 - Supabase Postgres with Drizzle ORM
 - Redis for rate limiting and resumable streams
 
@@ -71,3 +71,4 @@ Record changes to the default migration decisions here.
 | Date | Decision | Reason | Owner |
 | --- | --- | --- | --- |
 | 2026-06-17 | Initial roadmap created. | Prepare safe AI-assisted implementation. | Codex |
+| 2026-06-25 | Attachment URLs are resolved server-side before OpenAI calls. | OpenAI must download images from externally reachable HTTPS URLs; local/private Supabase URLs fail even when the app UI can render them. | Codex |
