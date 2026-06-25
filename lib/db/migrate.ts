@@ -7,6 +7,13 @@ config({
   path: ".env.local",
 });
 
+const isHarmlessDrizzleMigrationNotice = (notice: postgres.Notice) =>
+  (notice.code === "42P06" &&
+    notice.message === 'schema "drizzle" already exists, skipping') ||
+  (notice.code === "42P07" &&
+    notice.message ===
+      'relation "__drizzle_migrations" already exists, skipping');
+
 const runMigrate = async () => {
   const databaseUrl =
     process.env.DIRECT_DATABASE_URL ??
@@ -18,7 +25,16 @@ const runMigrate = async () => {
     process.exit(0);
   }
 
-  const connection = postgres(databaseUrl, { max: 1 });
+  const connection = postgres(databaseUrl, {
+    max: 1,
+    onnotice: (notice) => {
+      if (isHarmlessDrizzleMigrationNotice(notice)) {
+        return;
+      }
+
+      console.log(notice);
+    },
+  });
   const db = drizzle(connection);
 
   console.log("Running migrations...");
