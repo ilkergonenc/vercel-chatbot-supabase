@@ -10,8 +10,11 @@ config({
   path: ".env.local",
 });
 
+process.env.PLAYWRIGHT ??= "true";
+
 /* Use process.env.PORT by default and fallback to port 3000 */
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || "3100";
+process.env.PORT = PORT;
 
 /**
  * Set webServer.url and use.baseURL with the location
@@ -92,9 +95,14 @@ export default defineConfig({
 
   /* Run your local dev server before starting the tests */
   webServer: {
-    command: "pnpm dev",
+    command: "pnpm exec cross-env PLAYWRIGHT=true pnpm dev",
+    env: {
+      ...process.env,
+      PLAYWRIGHT: "true",
+      PORT,
+    },
     url: `${baseURL}/ping`,
     timeout: 120 * 1000,
-    reuseExistingServer: !process.env.CI,
+    reuseExistingServer: false,
   },
 });
