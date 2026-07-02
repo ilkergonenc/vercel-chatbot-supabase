@@ -24,7 +24,7 @@ export type ChatModel = {
 export const chatModels: ChatModel[] = [
   {
     id: "gpt-4.1",
-    name: "GPT 4.1",
+    name: "GPT-4.1",
     provider: "openai",
     description: "Flagship OpenAI model for complex chat and tool use",
   },
