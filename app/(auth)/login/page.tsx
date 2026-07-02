@@ -48,7 +48,7 @@ export default function Page() {
       <AuthForm action={handleSubmit} defaultEmail={email}>
         <SubmitButton isSuccessful={isSuccessful}>Sign in</SubmitButton>
         <p className="text-center text-[13px] text-muted-foreground">
-          {"No account? "}
+          {"Don't have an account? "}
           <Link
             className="text-foreground underline-offset-4 hover:underline"
             href="/register"
