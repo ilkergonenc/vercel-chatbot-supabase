@@ -1,9 +1,9 @@
-import { memo } from "react";
-import { initialArtifactData, useArtifact } from "@/hooks/use-artifact";
-import { CrossIcon } from "./icons";
+import { memo } from 'react'
+import { initialArtifactData, useArtifact } from '@/hooks/use-artifact'
+import { CrossIcon } from './icons'
 
 function PureArtifactCloseButton() {
-  const { setArtifact } = useArtifact();
+  const { setArtifact } = useArtifact()
 
   return (
     <button
@@ -11,19 +11,19 @@ function PureArtifactCloseButton() {
       data-testid="artifact-close-button"
       onClick={() => {
         setArtifact((currentArtifact) =>
-          currentArtifact.status === "streaming"
+          currentArtifact.status === 'streaming'
             ? {
                 ...currentArtifact,
                 isVisible: false,
               }
-            : { ...initialArtifactData, status: "idle" }
-        );
+            : { ...initialArtifactData, status: 'idle' },
+        )
       }}
       type="button"
     >
       <CrossIcon size={16} />
     </button>
-  );
+  )
 }
 
-export const ArtifactCloseButton = memo(PureArtifactCloseButton, () => true);
+export const ArtifactCloseButton = memo(PureArtifactCloseButton, () => true)

@@ -1,30 +1,30 @@
-"use client";
+'use client'
 
-import type { UseChatHelpers } from "@ai-sdk/react";
-import { motion } from "framer-motion";
-import { memo } from "react";
-import { suggestions } from "@/lib/constants";
-import type { ChatMessage } from "@/lib/types";
-import { Suggestion } from "../ai-elements/suggestion";
-import type { VisibilityType } from "./visibility-selector";
+import type { UseChatHelpers } from '@ai-sdk/react'
+import { motion } from 'framer-motion'
+import { memo } from 'react'
+import { suggestions } from '@/lib/constants'
+import type { ChatMessage } from '@/lib/types'
+import { Suggestion } from '../ai-elements/suggestion'
+import type { VisibilityType } from './visibility-selector'
 
 type SuggestedActionsProps = {
-  chatId: string;
-  sendMessage: UseChatHelpers<ChatMessage>["sendMessage"];
-  selectedVisibilityType: VisibilityType;
-};
+  chatId: string
+  sendMessage: UseChatHelpers<ChatMessage>['sendMessage']
+  selectedVisibilityType: VisibilityType
+}
 
 function PureSuggestedActions({ chatId, sendMessage }: SuggestedActionsProps) {
-  const suggestedActions = suggestions;
+  const suggestedActions = suggestions
 
   return (
     <div
       className="flex w-full gap-2.5 overflow-x-auto pb-1 sm:grid sm:grid-cols-2 sm:overflow-visible"
       data-testid="suggested-actions"
       style={{
-        scrollbarWidth: "none",
-        WebkitOverflowScrolling: "touch",
-        msOverflowStyle: "none",
+        scrollbarWidth: 'none',
+        WebkitOverflowScrolling: 'touch',
+        msOverflowStyle: 'none',
       }}
     >
       {suggestedActions.map((suggestedAction, index) => (
@@ -45,13 +45,13 @@ function PureSuggestedActions({ chatId, sendMessage }: SuggestedActionsProps) {
             onClick={(suggestion) => {
               window.history.pushState(
                 {},
-                "",
-                `${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/chat/${chatId}`
-              );
+                '',
+                `${process.env.NEXT_PUBLIC_BASE_PATH ?? ''}/chat/${chatId}`,
+              )
               sendMessage({
-                role: "user",
-                parts: [{ type: "text", text: suggestion }],
-              });
+                role: 'user',
+                parts: [{ type: 'text', text: suggestion }],
+              })
             }}
             suggestion={suggestedAction}
           >
@@ -60,19 +60,16 @@ function PureSuggestedActions({ chatId, sendMessage }: SuggestedActionsProps) {
         </motion.div>
       ))}
     </div>
-  );
+  )
 }
 
-export const SuggestedActions = memo(
-  PureSuggestedActions,
-  (prevProps, nextProps) => {
-    if (prevProps.chatId !== nextProps.chatId) {
-      return false;
-    }
-    if (prevProps.selectedVisibilityType !== nextProps.selectedVisibilityType) {
-      return false;
-    }
-
-    return true;
+export const SuggestedActions = memo(PureSuggestedActions, (prevProps, nextProps) => {
+  if (prevProps.chatId !== nextProps.chatId) {
+    return false
   }
-);
+  if (prevProps.selectedVisibilityType !== nextProps.selectedVisibilityType) {
+    return false
+  }
+
+  return true
+})

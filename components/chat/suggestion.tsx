@@ -1,19 +1,19 @@
-"use client";
+'use client'
 
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion } from 'framer-motion'
 
-import type { UISuggestion } from "@/lib/editor/suggestions";
-import { Button } from "../ui/button";
-import { CrossIcon, SparklesIcon } from "./icons";
+import type { UISuggestion } from '@/lib/editor/suggestions'
+import { Button } from '../ui/button'
+import { CrossIcon, SparklesIcon } from './icons'
 
 export const SuggestionDialog = ({
   suggestion,
   onApply,
   onClose,
 }: {
-  suggestion: UISuggestion;
-  onApply: () => void;
-  onClose: () => void;
+  suggestion: UISuggestion
+  onApply: () => void
+  onClose: () => void
 }) => {
   return (
     <AnimatePresence>
@@ -23,8 +23,8 @@ export const SuggestionDialog = ({
           className="absolute inset-0 bg-black/20 backdrop-blur-[2px]"
           onClick={onClose}
           onKeyDown={(e) => {
-            if (e.key === "Escape") {
-              onClose();
+            if (e.key === 'Escape') {
+              onClose()
             }
           }}
           role="presentation"
@@ -52,27 +52,17 @@ export const SuggestionDialog = ({
               <CrossIcon size={12} />
             </button>
           </div>
-          <div className="text-muted-foreground leading-relaxed">
-            {suggestion.description}
-          </div>
+          <div className="text-muted-foreground leading-relaxed">{suggestion.description}</div>
           <div className="flex gap-2">
-            <Button
-              className="w-fit rounded-full px-3 py-1.5"
-              onClick={onApply}
-              variant="outline"
-            >
+            <Button className="w-fit rounded-full px-3 py-1.5" onClick={onApply} variant="outline">
               Apply
             </Button>
-            <Button
-              className="w-fit rounded-full px-3 py-1.5"
-              onClick={onClose}
-              variant="ghost"
-            >
+            <Button className="w-fit rounded-full px-3 py-1.5" onClick={onClose} variant="ghost">
               Dismiss
             </Button>
           </div>
         </motion.div>
       </div>
     </AnimatePresence>
-  );
-};
+  )
+}

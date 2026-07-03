@@ -1,4 +1,4 @@
-import { geolocation, ipAddress } from "@vercel/functions";
+import { geolocation, ipAddress } from '@vercel/functions'
 import {
   convertToModelMessages,
   createUIMessageStream,
@@ -6,25 +6,20 @@ import {
   generateId,
   stepCountIs,
   streamText,
-} from "ai";
-import { after } from "next/server";
-import { createResumableStreamContext } from "resumable-stream";
-import { entitlementsByUserType } from "@/lib/ai/entitlements";
-import {
-  allowedModelIds,
-  chatModels,
-  DEFAULT_CHAT_MODEL,
-  getCapabilities,
-} from "@/lib/ai/models";
-import { type RequestHints, systemPrompt } from "@/lib/ai/prompts";
-import { getLanguageModel } from "@/lib/ai/providers";
-import { createDocument } from "@/lib/ai/tools/create-document";
-import { editDocument } from "@/lib/ai/tools/edit-document";
-import { getWeather } from "@/lib/ai/tools/get-weather";
-import { requestSuggestions } from "@/lib/ai/tools/request-suggestions";
-import { updateDocument } from "@/lib/ai/tools/update-document";
-import { auth, type UserType } from "@/lib/auth/session";
-import { isProductionEnvironment } from "@/lib/constants";
+} from 'ai'
+import { after } from 'next/server'
+import { createResumableStreamContext } from 'resumable-stream'
+import { entitlementsByUserType } from '@/lib/ai/entitlements'
+import { allowedModelIds, chatModels, DEFAULT_CHAT_MODEL, getCapabilities } from '@/lib/ai/models'
+import { type RequestHints, systemPrompt } from '@/lib/ai/prompts'
+import { getLanguageModel } from '@/lib/ai/providers'
+import { createDocument } from '@/lib/ai/tools/create-document'
+import { editDocument } from '@/lib/ai/tools/edit-document'
+import { getWeather } from '@/lib/ai/tools/get-weather'
+import { requestSuggestions } from '@/lib/ai/tools/request-suggestions'
+import { updateDocument } from '@/lib/ai/tools/update-document'
+import { auth, type UserType } from '@/lib/auth/session'
+import { isProductionEnvironment } from '@/lib/constants'
 import {
   createStreamId,
   deleteChatById,
@@ -35,218 +30,204 @@ import {
   saveMessages,
   updateChatTitleById,
   updateMessage,
-} from "@/lib/db/queries";
-import type { DBMessage } from "@/lib/db/schema";
-import { ChatbotError } from "@/lib/errors";
-import { checkIpRateLimit } from "@/lib/ratelimit";
-import { resolveAttachmentUrlsForModel } from "@/lib/supabase/storage";
-import type { ChatMessage } from "@/lib/types";
-import { convertToUIMessages, generateUUID } from "@/lib/utils";
-import { generateTitleFromUserMessage } from "../../actions";
-import { type PostRequestBody, postRequestBodySchema } from "./schema";
+} from '@/lib/db/queries'
+import type { DBMessage } from '@/lib/db/schema'
+import { ChatbotError } from '@/lib/errors'
+import { checkIpRateLimit } from '@/lib/ratelimit'
+import { resolveAttachmentUrlsForModel } from '@/lib/supabase/storage'
+import type { ChatMessage } from '@/lib/types'
+import { convertToUIMessages, generateUUID } from '@/lib/utils'
+import { generateTitleFromUserMessage } from '../../actions'
+import { type PostRequestBody, postRequestBodySchema } from './schema'
 
-export const maxDuration = 60;
+export const maxDuration = 60
 
 function getStreamContext() {
   try {
-    return createResumableStreamContext({ waitUntil: after });
+    return createResumableStreamContext({ waitUntil: after })
   } catch (_) {
-    return null;
+    return null
   }
 }
 
-export { getStreamContext };
+export { getStreamContext }
 
 function redactAttachmentUrl(url: unknown) {
-  if (typeof url !== "string") {
-    return "[missing-url]";
+  if (typeof url !== 'string') {
+    return '[missing-url]'
   }
 
   try {
-    const parsedUrl = new URL(url);
-    parsedUrl.search = parsedUrl.search ? "?[redacted]" : "";
-    return parsedUrl.toString();
+    const parsedUrl = new URL(url)
+    parsedUrl.search = parsedUrl.search ? '?[redacted]' : ''
+    return parsedUrl.toString()
   } catch (_) {
-    return "[invalid-url]";
+    return '[invalid-url]'
   }
 }
 
 function logInvalidChatRequestPayload(payload: unknown, cause: unknown) {
   const parts =
-    typeof payload === "object" && payload !== null && "message" in payload
+    typeof payload === 'object' && payload !== null && 'message' in payload
       ? (payload as { message?: { parts?: unknown[] } }).message?.parts
-      : undefined;
+      : undefined
 
   const attachments = Array.isArray(parts)
     ? parts
         .filter(
           (part): part is Record<string, unknown> =>
-            typeof part === "object" &&
-            part !== null &&
-            "type" in part &&
-            part.type === "file"
+            typeof part === 'object' && part !== null && 'type' in part && part.type === 'file',
         )
         .map((part) => ({
           mediaType: part.mediaType,
-          nameLength: typeof part.name === "string" ? part.name.length : null,
+          nameLength: typeof part.name === 'string' ? part.name.length : null,
           url: redactAttachmentUrl(part.url),
         }))
-    : [];
+    : []
 
-  console.warn("Invalid chat request payload", {
+  console.warn('Invalid chat request payload', {
     attachments,
     cause,
-  });
+  })
 }
 
 async function checkBotIdIfConfigured() {
-  if (process.env.NODE_ENV !== "production" || !process.env.BOTID_SECRET_KEY) {
-    return null;
+  if (process.env.NODE_ENV !== 'production' || !process.env.BOTID_SECRET_KEY) {
+    return null
   }
 
-  const { checkBotId } = await import("botid/server");
-  return checkBotId().catch(() => null);
+  const { checkBotId } = await import('botid/server')
+  return checkBotId().catch(() => null)
 }
 
 export async function POST(request: Request) {
-  let requestBody: PostRequestBody;
+  let requestBody: PostRequestBody
 
   try {
-    const json = await request.json();
-    const validatedRequestBody = postRequestBodySchema.safeParse(json);
+    const json = await request.json()
+    const validatedRequestBody = postRequestBodySchema.safeParse(json)
 
     if (!validatedRequestBody.success) {
-      logInvalidChatRequestPayload(json, validatedRequestBody.error.flatten());
+      logInvalidChatRequestPayload(json, validatedRequestBody.error.flatten())
       return new ChatbotError(
-        "bad_request:api",
-        "Invalid chat request payload. Check attachment URL, name, and media type."
-      ).toResponse();
+        'bad_request:api',
+        'Invalid chat request payload. Check attachment URL, name, and media type.',
+      ).toResponse()
     }
 
-    requestBody = validatedRequestBody.data;
+    requestBody = validatedRequestBody.data
   } catch (error) {
-    logInvalidChatRequestPayload(null, error);
-    return new ChatbotError("bad_request:api").toResponse();
+    logInvalidChatRequestPayload(null, error)
+    return new ChatbotError('bad_request:api').toResponse()
   }
 
   try {
-    const { id, message, messages, selectedChatModel, selectedVisibilityType } =
-      requestBody;
+    const { id, message, messages, selectedChatModel, selectedVisibilityType } = requestBody
 
-    const [, session] = await Promise.all([checkBotIdIfConfigured(), auth()]);
+    const [, session] = await Promise.all([checkBotIdIfConfigured(), auth()])
 
     if (!session?.user) {
-      return new ChatbotError("unauthorized:chat").toResponse();
+      return new ChatbotError('unauthorized:chat').toResponse()
     }
 
     const chatModel = allowedModelIds.has(selectedChatModel)
       ? selectedChatModel
-      : DEFAULT_CHAT_MODEL;
+      : DEFAULT_CHAT_MODEL
 
-    await checkIpRateLimit(ipAddress(request));
+    await checkIpRateLimit(ipAddress(request))
 
-    const userType: UserType = session.user.type;
+    const userType: UserType = session.user.type
 
     const messageCount = await getMessageCountByUserId({
       id: session.user.id,
       differenceInHours: 1,
-    });
+    })
 
     if (messageCount > entitlementsByUserType[userType].maxMessagesPerHour) {
-      return new ChatbotError("rate_limit:chat").toResponse();
+      return new ChatbotError('rate_limit:chat').toResponse()
     }
 
-    const isToolApprovalFlow = Boolean(messages);
+    const isToolApprovalFlow = Boolean(messages)
 
-    const chat = await getChatById({ id });
-    let messagesFromDb: DBMessage[] = [];
-    let titlePromise: Promise<string> | null = null;
+    const chat = await getChatById({ id })
+    let messagesFromDb: DBMessage[] = []
+    let titlePromise: Promise<string> | null = null
 
     if (chat) {
       if (chat.userId !== session.user.id) {
-        return new ChatbotError("forbidden:chat").toResponse();
+        return new ChatbotError('forbidden:chat').toResponse()
       }
-      messagesFromDb = await getMessagesByChatId({ id });
-    } else if (message?.role === "user") {
+      messagesFromDb = await getMessagesByChatId({ id })
+    } else if (message?.role === 'user') {
       await saveChat({
         id,
         userId: session.user.id,
-        title: "New chat",
+        title: 'New chat',
         visibility: selectedVisibilityType,
-      });
-      titlePromise = generateTitleFromUserMessage({ message });
+      })
+      titlePromise = generateTitleFromUserMessage({ message })
     }
 
-    let uiMessages: ChatMessage[];
+    let uiMessages: ChatMessage[]
 
     if (isToolApprovalFlow && messages) {
-      const dbMessages = convertToUIMessages(messagesFromDb);
+      const dbMessages = convertToUIMessages(messagesFromDb)
       const approvalStates = new Map(
         messages.flatMap(
           (m) =>
             m.parts
               ?.filter(
                 (p: Record<string, unknown>) =>
-                  p.state === "approval-responded" ||
-                  p.state === "output-denied"
+                  p.state === 'approval-responded' || p.state === 'output-denied',
               )
-              .map((p: Record<string, unknown>) => [
-                String(p.toolCallId ?? ""),
-                p,
-              ]) ?? []
-        )
-      );
+              .map((p: Record<string, unknown>) => [String(p.toolCallId ?? ''), p]) ?? [],
+        ),
+      )
       uiMessages = dbMessages.map((msg) => ({
         ...msg,
         parts: msg.parts.map((part) => {
-          if (
-            "toolCallId" in part &&
-            approvalStates.has(String(part.toolCallId))
-          ) {
-            return { ...part, ...approvalStates.get(String(part.toolCallId)) };
+          if ('toolCallId' in part && approvalStates.has(String(part.toolCallId))) {
+            return { ...part, ...approvalStates.get(String(part.toolCallId)) }
           }
-          return part;
+          return part
         }),
-      })) as ChatMessage[];
+      })) as ChatMessage[]
     } else {
-      uiMessages = [
-        ...convertToUIMessages(messagesFromDb),
-        message as ChatMessage,
-      ];
+      uiMessages = [...convertToUIMessages(messagesFromDb), message as ChatMessage]
     }
 
-    const { longitude, latitude, city, country } = geolocation(request);
+    const { longitude, latitude, city, country } = geolocation(request)
 
     const requestHints: RequestHints = {
       longitude,
       latitude,
       city,
       country,
-    };
+    }
 
-    if (message?.role === "user") {
+    if (message?.role === 'user') {
       await saveMessages({
         messages: [
           {
             chatId: id,
             id: message.id,
-            role: "user",
+            role: 'user',
             parts: message.parts,
             attachments: [],
             createdAt: new Date(),
           },
         ],
-      });
+      })
     }
 
-    const modelConfig = chatModels.find((m) => m.id === chatModel);
-    const modelCapabilities = getCapabilities();
-    const capabilities = modelCapabilities[chatModel];
-    const isReasoningModel = capabilities?.reasoning === true;
-    const supportsTools = capabilities?.tools === true;
+    const modelConfig = chatModels.find((m) => m.id === chatModel)
+    const modelCapabilities = getCapabilities()
+    const capabilities = modelCapabilities[chatModel]
+    const isReasoningModel = capabilities?.reasoning === true
+    const supportsTools = capabilities?.tools === true
 
-    const uiMessagesForModel = await resolveAttachmentUrlsForModel(uiMessages);
-    const modelMessages = await convertToModelMessages(uiMessagesForModel);
+    const uiMessagesForModel = await resolveAttachmentUrlsForModel(uiMessages)
+    const modelMessages = await convertToModelMessages(uiMessagesForModel)
 
     const stream = createUIMessageStream({
       originalMessages: isToolApprovalFlow ? uiMessages : undefined,
@@ -260,11 +241,11 @@ export async function POST(request: Request) {
             isReasoningModel && !supportsTools
               ? []
               : [
-                  "getWeather",
-                  "createDocument",
-                  "editDocument",
-                  "updateDocument",
-                  "requestSuggestions",
+                  'getWeather',
+                  'createDocument',
+                  'editDocument',
+                  'updateDocument',
+                  'requestSuggestions',
                 ],
           providerOptions: {
             ...(modelConfig?.reasoningEffort && {
@@ -292,19 +273,17 @@ export async function POST(request: Request) {
           },
           experimental_telemetry: {
             isEnabled: isProductionEnvironment,
-            functionId: "stream-text",
+            functionId: 'stream-text',
           },
-        });
+        })
 
-        dataStream.merge(
-          result.toUIMessageStream({ sendReasoning: isReasoningModel })
-        );
+        dataStream.merge(result.toUIMessageStream({ sendReasoning: isReasoningModel }))
 
         if (titlePromise) {
           try {
-            const title = await titlePromise;
-            dataStream.write({ type: "data-chat-title", data: title });
-            updateChatTitleById({ chatId: id, title });
+            const title = await titlePromise
+            dataStream.write({ type: 'data-chat-title', data: title })
+            updateChatTitleById({ chatId: id, title })
           } catch (_) {
             /* non-fatal */
           }
@@ -314,12 +293,12 @@ export async function POST(request: Request) {
       onFinish: async ({ messages: finishedMessages }) => {
         if (isToolApprovalFlow) {
           for (const finishedMsg of finishedMessages) {
-            const existingMsg = uiMessages.find((m) => m.id === finishedMsg.id);
+            const existingMsg = uiMessages.find((m) => m.id === finishedMsg.id)
             if (existingMsg) {
               await updateMessage({
                 id: finishedMsg.id,
                 parts: finishedMsg.parts,
-              });
+              })
             } else {
               await saveMessages({
                 messages: [
@@ -332,7 +311,7 @@ export async function POST(request: Request) {
                     chatId: id,
                   },
                 ],
-              });
+              })
             }
           }
         } else if (finishedMessages.length > 0) {
@@ -345,68 +324,65 @@ export async function POST(request: Request) {
               attachments: [],
               chatId: id,
             })),
-          });
+          })
         }
       },
       onError: (_error) => {
-        return "Oops, an error occurred!";
+        return 'Oops, an error occurred!'
       },
-    });
+    })
 
     return createUIMessageStreamResponse({
       stream,
       async consumeSseStream({ stream: sseStream }) {
         if (!process.env.REDIS_URL) {
-          return;
+          return
         }
         try {
-          const streamContext = getStreamContext();
+          const streamContext = getStreamContext()
           if (streamContext) {
-            const streamId = generateId();
-            await createStreamId({ streamId, chatId: id });
-            await streamContext.createNewResumableStream(
-              streamId,
-              () => sseStream
-            );
+            const streamId = generateId()
+            await createStreamId({ streamId, chatId: id })
+            await streamContext.createNewResumableStream(streamId, () => sseStream)
           }
         } catch (_) {
           /* non-critical */
         }
       },
-    });
+    })
   } catch (error) {
-    const vercelId = request.headers.get("x-vercel-id");
+    const vercelId = request.headers.get('x-vercel-id')
 
     if (error instanceof ChatbotError) {
-      return error.toResponse();
+      return error.toResponse()
     }
 
-    console.error("Unhandled error in chat API:", error, { vercelId });
-    return new ChatbotError("offline:chat").toResponse();
+    console.error('Unhandled error in chat API:', error, { vercelId })
+    return new ChatbotError('offline:chat').toResponse()
   }
 }
 
 export async function DELETE(request: Request) {
-  const { searchParams } = new URL(request.url);
-  const id = searchParams.get("id");
+  const { searchParams } = new URL(request.url)
+  const id = searchParams.get('id')
 
   if (!id) {
-    return new ChatbotError("bad_request:api").toResponse();
+    return new ChatbotError('bad_request:api').toResponse()
   }
 
-  const session = await auth();
+  const session = await auth()
 
   if (!session?.user) {
-    return new ChatbotError("unauthorized:chat").toResponse();
+    return new ChatbotError('unauthorized:chat').toResponse()
   }
 
-  const chat = await getChatById({ id });
+  const chat = await getChatById({ id })
 
   if (chat?.userId !== session.user.id) {
-    return new ChatbotError("forbidden:chat").toResponse();
+    return new ChatbotError('forbidden:chat').toResponse()
   }
 
-  const deletedChat = await deleteChatById({ id });
+  const deletedChat = await deleteChatById({ id })
 
-  return Response.json(deletedChat, { status: 200 });
+  return Response.json(deletedChat, { status: 200 })
 }

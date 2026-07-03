@@ -1,20 +1,16 @@
-"use client";
+'use client'
 
-import { useEffect, useRef, useState } from "react";
-import { useActiveChat } from "@/hooks/use-active-chat";
-import {
-  initialArtifactData,
-  useArtifact,
-  useArtifactSelector,
-} from "@/hooks/use-artifact";
-import type { Attachment, ChatMessage } from "@/lib/types";
-import { cn } from "@/lib/utils";
-import { Artifact } from "./artifact";
-import { ChatHeader } from "./chat-header";
-import { DataStreamHandler } from "./data-stream-handler";
-import { submitEditedMessage } from "./message-editor";
-import { Messages } from "./messages";
-import { MultimodalInput } from "./multimodal-input";
+import { useEffect, useRef, useState } from 'react'
+import { useActiveChat } from '@/hooks/use-active-chat'
+import { initialArtifactData, useArtifact, useArtifactSelector } from '@/hooks/use-artifact'
+import type { Attachment, ChatMessage } from '@/lib/types'
+import { cn } from '@/lib/utils'
+import { Artifact } from './artifact'
+import { ChatHeader } from './chat-header'
+import { DataStreamHandler } from './data-stream-handler'
+import { submitEditedMessage } from './message-editor'
+import { Messages } from './messages'
+import { MultimodalInput } from './multimodal-input'
 
 export function ChatShell() {
   const {
@@ -34,36 +30,34 @@ export function ChatShell() {
     votes,
     currentModelId,
     setCurrentModelId,
-  } = useActiveChat();
+  } = useActiveChat()
 
-  const [editingMessage, setEditingMessage] = useState<ChatMessage | null>(
-    null
-  );
-  const [attachments, setAttachments] = useState<Attachment[]>([]);
-  const isArtifactVisible = useArtifactSelector((state) => state.isVisible);
-  const { setArtifact } = useArtifact();
+  const [editingMessage, setEditingMessage] = useState<ChatMessage | null>(null)
+  const [attachments, setAttachments] = useState<Attachment[]>([])
+  const isArtifactVisible = useArtifactSelector((state) => state.isVisible)
+  const { setArtifact } = useArtifact()
 
-  const stopRef = useRef(stop);
-  stopRef.current = stop;
+  const stopRef = useRef(stop)
+  stopRef.current = stop
 
-  const prevChatIdRef = useRef(chatId);
+  const prevChatIdRef = useRef(chatId)
   useEffect(() => {
     if (prevChatIdRef.current !== chatId) {
-      prevChatIdRef.current = chatId;
-      stopRef.current();
-      setArtifact(initialArtifactData);
-      setEditingMessage(null);
-      setAttachments([]);
+      prevChatIdRef.current = chatId
+      stopRef.current()
+      setArtifact(initialArtifactData)
+      setEditingMessage(null)
+      setAttachments([])
     }
-  }, [chatId, setArtifact]);
+  }, [chatId, setArtifact])
 
   return (
     <>
       <div className="flex h-dvh w-full flex-row overflow-hidden">
         <div
           className={cn(
-            "flex min-w-0 flex-col bg-sidebar transition-[width] duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]",
-            isArtifactVisible ? "w-[40%]" : "w-full"
+            'flex min-w-0 flex-col bg-sidebar transition-[width] duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]',
+            isArtifactVisible ? 'w-[40%]' : 'w-full',
           )}
         >
           <ChatHeader
@@ -82,11 +76,11 @@ export function ChatShell() {
               messages={messages}
               onEditMessage={(msg) => {
                 const text = msg.parts
-                  ?.filter((p) => p.type === "text")
+                  ?.filter((p) => p.type === 'text')
                   .map((p) => p.text)
-                  .join("");
-                setInput(text ?? "");
-                setEditingMessage(msg);
+                  .join('')
+                setInput(text ?? '')
+                setEditingMessage(msg)
               }}
               regenerate={regenerate}
               selectedModelId={currentModelId}
@@ -105,8 +99,8 @@ export function ChatShell() {
                   isLoading={isLoading}
                   messages={messages}
                   onCancelEdit={() => {
-                    setEditingMessage(null);
-                    setInput("");
+                    setEditingMessage(null)
+                    setInput('')
                   }}
                   onModelChange={setCurrentModelId}
                   selectedModelId={currentModelId}
@@ -114,15 +108,15 @@ export function ChatShell() {
                   sendMessage={
                     editingMessage
                       ? async () => {
-                          const msg = editingMessage;
-                          setEditingMessage(null);
+                          const msg = editingMessage
+                          setEditingMessage(null)
                           await submitEditedMessage({
                             message: msg,
                             text: input,
                             setMessages,
                             regenerate,
-                          });
-                          setInput("");
+                          })
+                          setInput('')
                         }
                       : sendMessage
                   }
@@ -159,5 +153,5 @@ export function ChatShell() {
 
       <DataStreamHandler />
     </>
-  );
+  )
 }

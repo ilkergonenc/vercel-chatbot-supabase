@@ -1,4 +1,4 @@
-import { motion } from "framer-motion";
+import { motion } from 'framer-motion'
 
 export const Greeting = () => {
   return (
@@ -20,5 +20,5 @@ export const Greeting = () => {
         Ask a question, write code, or explore ideas.
       </motion.div>
     </div>
-  );
-};
+  )
+}

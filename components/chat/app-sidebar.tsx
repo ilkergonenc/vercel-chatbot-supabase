@@ -1,22 +1,14 @@
-"use client";
+'use client'
 
-import {
-  MessageSquareIcon,
-  PanelLeftIcon,
-  PenSquareIcon,
-  TrashIcon,
-} from "lucide-react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { toast } from "sonner";
-import { useSWRConfig } from "swr";
-import { unstable_serialize } from "swr/infinite";
-import {
-  getChatHistoryPaginationKey,
-  SidebarHistory,
-} from "@/components/chat/sidebar-history";
-import { SidebarUserNav } from "@/components/chat/sidebar-user-nav";
+import { MessageSquareIcon, PanelLeftIcon, PenSquareIcon, TrashIcon } from 'lucide-react'
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { useState } from 'react'
+import { toast } from 'sonner'
+import { useSWRConfig } from 'swr'
+import { unstable_serialize } from 'swr/infinite'
+import { getChatHistoryPaginationKey, SidebarHistory } from '@/components/chat/sidebar-history'
+import { SidebarUserNav } from '@/components/chat/sidebar-user-nav'
 import {
   Sidebar,
   SidebarContent,
@@ -30,8 +22,8 @@ import {
   SidebarRail,
   SidebarTrigger,
   useSidebar,
-} from "@/components/ui/sidebar";
-import type { AppUser } from "@/lib/auth/session";
+} from '@/components/ui/sidebar'
+import type { AppUser } from '@/lib/auth/session'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -41,28 +33,28 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "../ui/alert-dialog";
-import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
+} from '../ui/alert-dialog'
+import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip'
 
 export function AppSidebar({ user }: { user: AppUser | undefined }) {
-  const router = useRouter();
-  const { setOpenMobile, toggleSidebar } = useSidebar();
-  const { mutate } = useSWRConfig();
-  const [showDeleteAllDialog, setShowDeleteAllDialog] = useState(false);
+  const router = useRouter()
+  const { setOpenMobile, toggleSidebar } = useSidebar()
+  const { mutate } = useSWRConfig()
+  const [showDeleteAllDialog, setShowDeleteAllDialog] = useState(false)
 
   const handleDeleteAll = () => {
-    setShowDeleteAllDialog(false);
-    router.replace("/");
+    setShowDeleteAllDialog(false)
+    router.replace('/')
     mutate(unstable_serialize(getChatHistoryPaginationKey), [], {
       revalidate: false,
-    });
+    })
 
-    fetch(`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/api/history`, {
-      method: "DELETE",
-    });
+    fetch(`${process.env.NEXT_PUBLIC_BASE_PATH ?? ''}/api/history`, {
+      method: 'DELETE',
+    })
 
-    toast.success("All chats deleted");
-  };
+    toast.success('All chats deleted')
+  }
 
   return (
     <>
@@ -108,8 +100,8 @@ export function AppSidebar({ user }: { user: AppUser | undefined }) {
                   <SidebarMenuButton
                     className="h-8 rounded-lg border border-sidebar-border text-[13px] text-sidebar-foreground/70 transition-colors duration-150 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
                     onClick={() => {
-                      setOpenMobile(false);
-                      router.push("/");
+                      setOpenMobile(false)
+                      router.push('/')
                     }}
                     tooltip="New Chat"
                   >
@@ -140,26 +132,21 @@ export function AppSidebar({ user }: { user: AppUser | undefined }) {
         <SidebarRail />
       </Sidebar>
 
-      <AlertDialog
-        onOpenChange={setShowDeleteAllDialog}
-        open={showDeleteAllDialog}
-      >
+      <AlertDialog onOpenChange={setShowDeleteAllDialog} open={showDeleteAllDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Delete all chats?</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete all
-              your chats and remove them from our servers.
+              This action cannot be undone. This will permanently delete all your chats and remove
+              them from our servers.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteAll}>
-              Delete All
-            </AlertDialogAction>
+            <AlertDialogAction onClick={handleDeleteAll}>Delete All</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
     </>
-  );
+  )
 }

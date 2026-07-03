@@ -1,13 +1,9 @@
-import type { UseChatHelpers } from "@ai-sdk/react";
-import { useEffect, useState } from "react";
-import type { ChatMessage } from "@/lib/types";
-import { useScrollToBottom } from "./use-scroll-to-bottom";
+import type { UseChatHelpers } from '@ai-sdk/react'
+import { useEffect, useState } from 'react'
+import type { ChatMessage } from '@/lib/types'
+import { useScrollToBottom } from './use-scroll-to-bottom'
 
-export function useMessages({
-  status,
-}: {
-  status: UseChatHelpers<ChatMessage>["status"];
-}) {
+export function useMessages({ status }: { status: UseChatHelpers<ChatMessage>['status'] }) {
   const {
     containerRef,
     endRef,
@@ -16,15 +12,15 @@ export function useMessages({
     onViewportEnter,
     onViewportLeave,
     reset,
-  } = useScrollToBottom();
+  } = useScrollToBottom()
 
-  const [hasSentMessage, setHasSentMessage] = useState(false);
+  const [hasSentMessage, setHasSentMessage] = useState(false)
 
   useEffect(() => {
-    if (status === "submitted") {
-      setHasSentMessage(true);
+    if (status === 'submitted') {
+      setHasSentMessage(true)
     }
-  }, [status]);
+  }, [status])
 
   return {
     containerRef,
@@ -35,5 +31,5 @@ export function useMessages({
     onViewportLeave,
     hasSentMessage,
     reset,
-  };
+  }
 }

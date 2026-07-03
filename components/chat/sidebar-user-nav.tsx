@@ -1,36 +1,32 @@
-"use client";
+'use client'
 
-import { ChevronUp } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useTheme } from "next-themes";
-import { logout } from "@/app/(auth)/actions";
+import { ChevronUp } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { useTheme } from 'next-themes'
+import { logout } from '@/app/(auth)/actions'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-} from "@/components/ui/sidebar";
-import type { AppUser } from "@/lib/auth/session";
+} from '@/components/ui/dropdown-menu'
+import { SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar'
+import type { AppUser } from '@/lib/auth/session'
 
 function emailToHue(email: string): number {
-  let hash = 0;
+  let hash = 0
   for (const char of email) {
-    hash = char.charCodeAt(0) + ((hash << 5) - hash);
+    hash = char.charCodeAt(0) + ((hash << 5) - hash)
   }
-  return Math.abs(hash) % 360;
+  return Math.abs(hash) % 360
 }
 
 export function SidebarUserNav({ user }: { user: AppUser }) {
-  const router = useRouter();
-  const { setTheme, resolvedTheme } = useTheme();
+  const router = useRouter()
+  const { setTheme, resolvedTheme } = useTheme()
 
-  const isGuest = user.type === "guest";
+  const isGuest = user.type === 'guest'
 
   return (
     <SidebarMenu>
@@ -44,11 +40,11 @@ export function SidebarUserNav({ user }: { user: AppUser }) {
               <div
                 className="size-5 shrink-0 rounded-full ring-1 ring-sidebar-border/50"
                 style={{
-                  background: `linear-gradient(135deg, oklch(0.35 0.08 ${emailToHue(user.email ?? "")}), oklch(0.25 0.05 ${emailToHue(user.email ?? "") + 40}))`,
+                  background: `linear-gradient(135deg, oklch(0.35 0.08 ${emailToHue(user.email ?? '')}), oklch(0.25 0.05 ${emailToHue(user.email ?? '') + 40}))`,
                 }}
               />
               <span className="truncate text-[13px]" data-testid="user-email">
-                {isGuest ? "Guest" : user?.email}
+                {isGuest ? 'Guest' : user?.email}
               </span>
               <ChevronUp className="ml-auto size-3.5 text-sidebar-foreground/50" />
             </SidebarMenuButton>
@@ -61,11 +57,9 @@ export function SidebarUserNav({ user }: { user: AppUser }) {
             <DropdownMenuItem
               className="cursor-pointer text-[13px]"
               data-testid="user-nav-item-theme"
-              onSelect={() =>
-                setTheme(resolvedTheme === "dark" ? "light" : "dark")
-              }
+              onSelect={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
             >
-              {`Toggle ${resolvedTheme === "light" ? "dark" : "light"} mode`}
+              {`Toggle ${resolvedTheme === 'light' ? 'dark' : 'light'} mode`}
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild data-testid="user-nav-item-auth">
@@ -73,21 +67,21 @@ export function SidebarUserNav({ user }: { user: AppUser }) {
                 className="w-full cursor-pointer text-[13px]"
                 onClick={async () => {
                   if (isGuest) {
-                    router.push("/login");
+                    router.push('/login')
                   } else {
-                    await logout();
-                    router.push("/");
-                    router.refresh();
+                    await logout()
+                    router.push('/')
+                    router.refresh()
                   }
                 }}
                 type="button"
               >
-                {isGuest ? "Login to your account" : "Sign out"}
+                {isGuest ? 'Login to your account' : 'Sign out'}
               </button>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </SidebarMenuItem>
     </SidebarMenu>
-  );
+  )
 }

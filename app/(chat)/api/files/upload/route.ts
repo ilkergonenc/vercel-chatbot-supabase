@@ -1,64 +1,55 @@
-import { NextResponse } from "next/server";
-import { z } from "zod";
+import { NextResponse } from 'next/server'
+import { z } from 'zod'
 
-import { auth } from "@/lib/auth/session";
-import {
-  attachmentBucketName,
-  createStorageClient,
-  getAttachmentUrl,
-} from "@/lib/supabase/storage";
+import { auth } from '@/lib/auth/session'
+import { attachmentBucketName, createStorageClient, getAttachmentUrl } from '@/lib/supabase/storage'
 
 const FileSchema = z.object({
   file: z
     .instanceof(Blob)
     .refine((file) => file.size <= 5 * 1024 * 1024, {
-      message: "File size should be less than 5MB",
+      message: 'File size should be less than 5MB',
     })
-    .refine((file) => ["image/jpeg", "image/png"].includes(file.type), {
-      message: "File type should be JPEG or PNG",
+    .refine((file) => ['image/jpeg', 'image/png'].includes(file.type), {
+      message: 'File type should be JPEG or PNG',
     }),
-});
+})
 
 export async function POST(request: Request) {
-  const session = await auth();
+  const session = await auth()
 
   if (!session) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
   if (request.body === null) {
-    return new Response("Request body is empty", { status: 400 });
+    return new Response('Request body is empty', { status: 400 })
   }
 
   try {
-    const formData = await request.formData();
-    const file = formData.get("file") as Blob;
+    const formData = await request.formData()
+    const file = formData.get('file') as Blob
 
     if (!file) {
-      return NextResponse.json({ error: "No file uploaded" }, { status: 400 });
+      return NextResponse.json({ error: 'No file uploaded' }, { status: 400 })
     }
 
-    const validatedFile = FileSchema.safeParse({ file });
+    const validatedFile = FileSchema.safeParse({ file })
 
     if (!validatedFile.success) {
-      const errorMessage = validatedFile.error.errors
-        .map((error) => error.message)
-        .join(", ");
+      const errorMessage = validatedFile.error.errors.map((error) => error.message).join(', ')
 
-      return NextResponse.json({ error: errorMessage }, { status: 400 });
+      return NextResponse.json({ error: errorMessage }, { status: 400 })
     }
 
-    const filename = (formData.get("file") as File).name;
-    const safeName = filename.replace(/[^a-zA-Z0-9._-]/g, "_");
-    const pathname = `${session.user.id}/${Date.now()}-${crypto.randomUUID()}-${safeName}`;
-    const fileBuffer = await file.arrayBuffer();
-    const storage = createStorageClient();
+    const filename = (formData.get('file') as File).name
+    const safeName = filename.replace(/[^a-zA-Z0-9._-]/g, '_')
+    const pathname = `${session.user.id}/${Date.now()}-${crypto.randomUUID()}-${safeName}`
+    const fileBuffer = await file.arrayBuffer()
+    const storage = createStorageClient()
 
     if (!storage) {
-      return NextResponse.json(
-        { error: "Upload storage is not configured" },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: 'Upload storage is not configured' }, { status: 500 })
     }
 
     try {
@@ -67,26 +58,23 @@ export async function POST(request: Request) {
         .upload(pathname, fileBuffer, {
           contentType: file.type,
           upsert: false,
-        });
+        })
 
       if (error) {
-        return NextResponse.json({ error: "Upload failed" }, { status: 500 });
+        return NextResponse.json({ error: 'Upload failed' }, { status: 500 })
       }
 
-      const url = await getAttachmentUrl(pathname);
+      const url = await getAttachmentUrl(pathname)
 
       return NextResponse.json({
         url,
         pathname,
         contentType: file.type,
-      });
+      })
     } catch (_error) {
-      return NextResponse.json({ error: "Upload failed" }, { status: 500 });
+      return NextResponse.json({ error: 'Upload failed' }, { status: 500 })
     }
   } catch (_error) {
-    return NextResponse.json(
-      { error: "Failed to process request" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to process request' }, { status: 500 })
   }
 }

@@ -1,13 +1,9 @@
-import { ArrowLeftIcon } from "lucide-react";
-import Link from "next/link";
-import { SparklesIcon } from "@/components/chat/icons";
-import { Preview } from "@/components/chat/preview";
+import { ArrowLeftIcon } from 'lucide-react'
+import Link from 'next/link'
+import { SparklesIcon } from '@/components/chat/icons'
+import { Preview } from '@/components/chat/preview'
 
-export default function AuthLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex h-dvh w-screen bg-sidebar">
       <div className="flex w-full flex-col bg-background p-8 xl:w-[600px] xl:shrink-0 xl:rounded-r-2xl xl:border-r xl:border-border/40 md:p-16">
@@ -38,5 +34,5 @@ export default function AuthLayout({
         </div>
       </div>
     </div>
-  );
+  )
 }

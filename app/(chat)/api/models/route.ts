@@ -1,11 +1,11 @@
-import { chatModels, getCapabilities } from "@/lib/ai/models";
+import { chatModels, getCapabilities } from '@/lib/ai/models'
 
 export function GET() {
   const headers = {
-    "Cache-Control": "public, max-age=86400, s-maxage=86400",
-  };
+    'Cache-Control': 'public, max-age=86400, s-maxage=86400',
+  }
 
-  const capabilities = getCapabilities();
+  const capabilities = getCapabilities()
 
-  return Response.json({ capabilities, models: chatModels }, { headers });
+  return Response.json({ capabilities, models: chatModels }, { headers })
 }

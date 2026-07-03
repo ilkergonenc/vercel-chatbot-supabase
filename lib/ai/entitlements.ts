@@ -1,8 +1,8 @@
-import type { UserType } from "@/lib/auth/session";
+import type { UserType } from '@/lib/auth/session'
 
 type Entitlements = {
-  maxMessagesPerHour: number;
-};
+  maxMessagesPerHour: number
+}
 
 export const entitlementsByUserType: Record<UserType, Entitlements> = {
   guest: {
@@ -11,4 +11,4 @@ export const entitlementsByUserType: Record<UserType, Entitlements> = {
   regular: {
     maxMessagesPerHour: 10,
   },
-};
+}

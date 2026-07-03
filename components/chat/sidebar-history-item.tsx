@@ -1,7 +1,7 @@
-import Link from "next/link";
-import { memo } from "react";
-import { useChatVisibility } from "@/hooks/use-chat-visibility";
-import type { Chat } from "@/lib/db/schema";
+import Link from 'next/link'
+import { memo } from 'react'
+import { useChatVisibility } from '@/hooks/use-chat-visibility'
+import type { Chat } from '@/lib/db/schema'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,12 +11,8 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
-} from "../ui/dropdown-menu";
-import {
-  SidebarMenuAction,
-  SidebarMenuButton,
-  SidebarMenuItem,
-} from "../ui/sidebar";
+} from '../ui/dropdown-menu'
+import { SidebarMenuAction, SidebarMenuButton, SidebarMenuItem } from '../ui/sidebar'
 import {
   CheckCircleFillIcon,
   GlobeIcon,
@@ -24,7 +20,7 @@ import {
   MoreHorizontalIcon,
   ShareIcon,
   TrashIcon,
-} from "./icons";
+} from './icons'
 
 const PureChatItem = ({
   chat,
@@ -32,15 +28,15 @@ const PureChatItem = ({
   onDelete,
   setOpenMobile,
 }: {
-  chat: Chat;
-  isActive: boolean;
-  onDelete: (chatId: string) => void;
-  setOpenMobile: (open: boolean) => void;
+  chat: Chat
+  isActive: boolean
+  onDelete: (chatId: string) => void
+  setOpenMobile: (open: boolean) => void
 }) => {
   const { visibilityType, setVisibilityType } = useChatVisibility({
     chatId: chat.id,
     initialVisibilityType: chat.visibility,
-  });
+  })
 
   return (
     <SidebarMenuItem>
@@ -76,49 +72,44 @@ const PureChatItem = ({
                 <DropdownMenuItem
                   className="cursor-pointer flex-row justify-between"
                   onClick={() => {
-                    setVisibilityType("private");
+                    setVisibilityType('private')
                   }}
                 >
                   <div className="flex flex-row items-center gap-2">
                     <LockIcon size={12} />
                     <span>Private</span>
                   </div>
-                  {visibilityType === "private" ? (
-                    <CheckCircleFillIcon />
-                  ) : null}
+                  {visibilityType === 'private' ? <CheckCircleFillIcon /> : null}
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   className="cursor-pointer flex-row justify-between"
                   onClick={() => {
-                    setVisibilityType("public");
+                    setVisibilityType('public')
                   }}
                 >
                   <div className="flex flex-row items-center gap-2">
                     <GlobeIcon />
                     <span>Public</span>
                   </div>
-                  {visibilityType === "public" ? <CheckCircleFillIcon /> : null}
+                  {visibilityType === 'public' ? <CheckCircleFillIcon /> : null}
                 </DropdownMenuItem>
               </DropdownMenuSubContent>
             </DropdownMenuPortal>
           </DropdownMenuSub>
 
-          <DropdownMenuItem
-            onSelect={() => onDelete(chat.id)}
-            variant="destructive"
-          >
+          <DropdownMenuItem onSelect={() => onDelete(chat.id)} variant="destructive">
             <TrashIcon />
             <span>Delete</span>
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
     </SidebarMenuItem>
-  );
-};
+  )
+}
 
 export const ChatItem = memo(PureChatItem, (prevProps, nextProps) => {
   if (prevProps.isActive !== nextProps.isActive) {
-    return false;
+    return false
   }
-  return true;
-});
+  return true
+})

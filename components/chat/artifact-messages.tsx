@@ -1,24 +1,24 @@
-import type { UseChatHelpers } from "@ai-sdk/react";
-import equal from "fast-deep-equal";
-import { AnimatePresence, motion } from "framer-motion";
-import { memo } from "react";
-import { useMessages } from "@/hooks/use-messages";
-import type { Vote } from "@/lib/db/schema";
-import type { ChatMessage } from "@/lib/types";
-import type { UIArtifact } from "./artifact";
-import { PreviewMessage, ThinkingMessage } from "./message";
+import type { UseChatHelpers } from '@ai-sdk/react'
+import equal from 'fast-deep-equal'
+import { AnimatePresence, motion } from 'framer-motion'
+import { memo } from 'react'
+import { useMessages } from '@/hooks/use-messages'
+import type { Vote } from '@/lib/db/schema'
+import type { ChatMessage } from '@/lib/types'
+import type { UIArtifact } from './artifact'
+import { PreviewMessage, ThinkingMessage } from './message'
 
 type ArtifactMessagesProps = {
-  addToolApprovalResponse: UseChatHelpers<ChatMessage>["addToolApprovalResponse"];
-  chatId: string;
-  status: UseChatHelpers<ChatMessage>["status"];
-  votes: Vote[] | undefined;
-  messages: ChatMessage[];
-  setMessages: UseChatHelpers<ChatMessage>["setMessages"];
-  regenerate: UseChatHelpers<ChatMessage>["regenerate"];
-  isReadonly: boolean;
-  artifactStatus: UIArtifact["status"];
-};
+  addToolApprovalResponse: UseChatHelpers<ChatMessage>['addToolApprovalResponse']
+  chatId: string
+  status: UseChatHelpers<ChatMessage>['status']
+  votes: Vote[] | undefined
+  messages: ChatMessage[]
+  setMessages: UseChatHelpers<ChatMessage>['setMessages']
+  regenerate: UseChatHelpers<ChatMessage>['regenerate']
+  isReadonly: boolean
+  artifactStatus: UIArtifact['status']
+}
 
 function PureArtifactMessages({
   addToolApprovalResponse,
@@ -38,7 +38,7 @@ function PureArtifactMessages({
     hasSentMessage,
   } = useMessages({
     status,
-  });
+  })
 
   return (
     <div
@@ -49,29 +49,21 @@ function PureArtifactMessages({
         <PreviewMessage
           addToolApprovalResponse={addToolApprovalResponse}
           chatId={chatId}
-          isLoading={status === "streaming" && index === messages.length - 1}
+          isLoading={status === 'streaming' && index === messages.length - 1}
           isReadonly={isReadonly}
           key={message.id}
           message={message}
           regenerate={regenerate}
-          requiresScrollPadding={
-            hasSentMessage && index === messages.length - 1
-          }
+          requiresScrollPadding={hasSentMessage && index === messages.length - 1}
           setMessages={setMessages}
-          vote={
-            votes
-              ? votes.find((vote) => vote.messageId === message.id)
-              : undefined
-          }
+          vote={votes ? votes.find((vote) => vote.messageId === message.id) : undefined}
         />
       ))}
 
       <AnimatePresence mode="wait">
-        {status === "submitted" &&
+        {status === 'submitted' &&
           !messages.some((msg) =>
-            msg.parts?.some(
-              (part) => "state" in part && part.state === "approval-responded"
-            )
+            msg.parts?.some((part) => 'state' in part && part.state === 'approval-responded'),
           ) && <ThinkingMessage key="thinking" />}
       </AnimatePresence>
 
@@ -82,34 +74,28 @@ function PureArtifactMessages({
         ref={messagesEndRef}
       />
     </div>
-  );
+  )
 }
 
-function areEqual(
-  prevProps: ArtifactMessagesProps,
-  nextProps: ArtifactMessagesProps
-) {
-  if (
-    prevProps.artifactStatus === "streaming" &&
-    nextProps.artifactStatus === "streaming"
-  ) {
-    return true;
+function areEqual(prevProps: ArtifactMessagesProps, nextProps: ArtifactMessagesProps) {
+  if (prevProps.artifactStatus === 'streaming' && nextProps.artifactStatus === 'streaming') {
+    return true
   }
 
   if (prevProps.status !== nextProps.status) {
-    return false;
+    return false
   }
   if (prevProps.status && nextProps.status) {
-    return false;
+    return false
   }
   if (prevProps.messages.length !== nextProps.messages.length) {
-    return false;
+    return false
   }
   if (!equal(prevProps.votes, nextProps.votes)) {
-    return false;
+    return false
   }
 
-  return true;
+  return true
 }
 
-export const ArtifactMessages = memo(PureArtifactMessages, areEqual);
+export const ArtifactMessages = memo(PureArtifactMessages, areEqual)

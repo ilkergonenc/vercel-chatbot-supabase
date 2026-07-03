@@ -1,25 +1,22 @@
-import Form from "next/form";
-import { redirect } from "next/navigation";
+import Form from 'next/form'
+import { redirect } from 'next/navigation'
 
-import { logout } from "@/app/(auth)/actions";
+import { logout } from '@/app/(auth)/actions'
 
 export const SignOutForm = () => {
   return (
     <Form
       action={async () => {
-        "use server";
+        'use server'
 
-        await logout();
-        redirect("/");
+        await logout()
+        redirect('/')
       }}
       className="w-full"
     >
-      <button
-        className="w-full px-1 py-0.5 text-left text-red-500"
-        type="submit"
-      >
+      <button className="w-full px-1 py-0.5 text-left text-red-500" type="submit">
         Sign out
       </button>
     </Form>
-  );
-};
+  )
+}

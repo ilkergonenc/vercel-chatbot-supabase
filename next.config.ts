@@ -1,16 +1,16 @@
-import { withBotId } from "botid/next/config";
-import type { NextConfig } from "next";
+import { withBotId } from 'botid/next/config'
+import type { NextConfig } from 'next'
 
-const basePath = process.env.IS_DEMO === "1" ? "/demo" : "";
+const basePath = process.env.IS_DEMO === '1' ? '/demo' : ''
 
 const nextConfig: NextConfig = {
   ...(basePath
     ? {
         basePath,
-        assetPrefix: "/demo-assets",
+        assetPrefix: '/demo-assets',
         redirects: async () => [
           {
-            source: "/",
+            source: '/',
             destination: basePath,
             permanent: false,
             basePath: false,
@@ -34,36 +34,36 @@ const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
       {
-        protocol: "http",
-        hostname: "localhost",
-        port: "3000",
+        protocol: 'http',
+        hostname: 'localhost',
+        port: '3000',
       },
       {
-        protocol: "http",
-        hostname: "localhost",
-        port: "3001",
+        protocol: 'http',
+        hostname: 'localhost',
+        port: '3001',
       },
       {
-        protocol: "http",
-        hostname: "localhost",
-        port: "3333",
+        protocol: 'http',
+        hostname: 'localhost',
+        port: '3333',
       },
       {
-        hostname: "avatar.vercel.sh",
+        hostname: 'avatar.vercel.sh',
       },
       {
-        protocol: "https",
-        hostname: "*.public.blob.vercel-storage.com",
+        protocol: 'https',
+        hostname: '*.public.blob.vercel-storage.com',
       },
       {
-        protocol: "https",
-        hostname: "*.supabase.co",
-        pathname: "/storage/v1/object/public/**",
+        protocol: 'https',
+        hostname: '*.supabase.co',
+        pathname: '/storage/v1/object/public/**',
       },
       {
-        protocol: "https",
-        hostname: "*.supabase.co",
-        pathname: "/storage/v1/object/sign/**",
+        protocol: 'https',
+        hostname: '*.supabase.co',
+        pathname: '/storage/v1/object/sign/**',
       },
     ],
   },
@@ -74,8 +74,6 @@ const nextConfig: NextConfig = {
     inlineCss: true,
     turbopackFileSystemCacheForDev: true,
   },
-};
+}
 
-export default process.env.BOTID_SECRET_KEY
-  ? withBotId(nextConfig)
-  : nextConfig;
+export default process.env.BOTID_SECRET_KEY ? withBotId(nextConfig) : nextConfig

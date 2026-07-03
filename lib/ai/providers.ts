@@ -1,31 +1,31 @@
-import { openai } from "@ai-sdk/openai";
-import { customProvider } from "ai";
-import { isTestEnvironment } from "../constants";
-import { titleModel } from "./models";
+import { openai } from '@ai-sdk/openai'
+import { customProvider } from 'ai'
+import { isTestEnvironment } from '../constants'
+import { titleModel } from './models'
 
 export const myProvider = isTestEnvironment
   ? (() => {
-      const { chatModel, titleModel } = require("./models.mock");
+      const { chatModel, titleModel } = require('./models.mock')
       return customProvider({
         languageModels: {
-          "chat-model": chatModel,
-          "title-model": titleModel,
+          'chat-model': chatModel,
+          'title-model': titleModel,
         },
-      });
+      })
     })()
-  : null;
+  : null
 
 export function getLanguageModel(modelId: string) {
   if (isTestEnvironment && myProvider) {
-    return myProvider.languageModel(modelId);
+    return myProvider.languageModel(modelId)
   }
 
-  return openai(modelId);
+  return openai(modelId)
 }
 
 export function getTitleModel() {
   if (isTestEnvironment && myProvider) {
-    return myProvider.languageModel("title-model");
+    return myProvider.languageModel('title-model')
   }
-  return openai(titleModel.id);
+  return openai(titleModel.id)
 }

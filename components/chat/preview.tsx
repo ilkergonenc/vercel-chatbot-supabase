@@ -1,16 +1,16 @@
-"use client";
+'use client'
 
-import { useRouter } from "next/navigation";
-import { suggestions } from "@/lib/constants";
-import { SparklesIcon } from "./icons";
+import { useRouter } from 'next/navigation'
+import { suggestions } from '@/lib/constants'
+import { SparklesIcon } from './icons'
 
 export function Preview() {
-  const router = useRouter();
+  const router = useRouter()
 
   const handleAction = (query?: string) => {
-    const url = query ? `/?query=${encodeURIComponent(query)}` : "/";
-    router.push(url);
-  };
+    const url = query ? `/?query=${encodeURIComponent(query)}` : '/'
+    router.push(url)
+  }
 
   return (
     <div className="flex h-full flex-col overflow-hidden rounded-tl-2xl bg-background">
@@ -23,9 +23,7 @@ export function Preview() {
 
       <div className="flex flex-1 flex-col items-center justify-center gap-8 px-8">
         <div className="text-center">
-          <h2 className="text-xl font-semibold tracking-tight">
-            What can I help with?
-          </h2>
+          <h2 className="text-xl font-semibold tracking-tight">What can I help with?</h2>
           <p className="mt-1.5 text-sm text-muted-foreground">
             Ask a question, write code, or explore ideas.
           </p>
@@ -55,5 +53,5 @@ export function Preview() {
         </button>
       </div>
     </div>
-  );
+  )
 }

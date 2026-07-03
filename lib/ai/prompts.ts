@@ -1,5 +1,5 @@
-import type { Geo } from "@vercel/functions";
-import type { ArtifactKind } from "@/components/chat/artifact";
+import type { Geo } from '@vercel/functions'
+import type { ArtifactKind } from '@/components/chat/artifact'
 
 export const artifactsPrompt = `
 Artifacts is a side panel that displays content alongside the conversation. It supports scripts (code), documents (text), and spreadsheets. Changes appear in real-time.
@@ -42,18 +42,18 @@ CRITICAL RULES:
 
 **Using \`requestSuggestions\`:**
 - ONLY when the user explicitly asks for suggestions on an existing document
-`;
+`
 
 export const regularPrompt = `You are a helpful assistant. Keep responses concise and direct.
 
-When asked to write, create, or build something, do it immediately. Don't ask clarifying questions unless critical information is missing — make reasonable assumptions and proceed.`;
+When asked to write, create, or build something, do it immediately. Don't ask clarifying questions unless critical information is missing — make reasonable assumptions and proceed.`
 
 export type RequestHints = {
-  latitude: Geo["latitude"];
-  longitude: Geo["longitude"];
-  city: Geo["city"];
-  country: Geo["country"];
-};
+  latitude: Geo['latitude']
+  longitude: Geo['longitude']
+  city: Geo['city']
+  country: Geo['country']
+}
 
 export const getRequestPromptFromHints = (requestHints: RequestHints) => `\
 About the origin of user's request:
@@ -61,23 +61,23 @@ About the origin of user's request:
 - lon: ${requestHints.longitude}
 - city: ${requestHints.city}
 - country: ${requestHints.country}
-`;
+`
 
 export const systemPrompt = ({
   requestHints,
   supportsTools,
 }: {
-  requestHints: RequestHints;
-  supportsTools: boolean;
+  requestHints: RequestHints
+  supportsTools: boolean
 }) => {
-  const requestPrompt = getRequestPromptFromHints(requestHints);
+  const requestPrompt = getRequestPromptFromHints(requestHints)
 
   if (!supportsTools) {
-    return `${regularPrompt}\n\n${requestPrompt}`;
+    return `${regularPrompt}\n\n${requestPrompt}`
   }
 
-  return `${regularPrompt}\n\n${requestPrompt}\n\n${artifactsPrompt}`;
-};
+  return `${regularPrompt}\n\n${requestPrompt}\n\n${artifactsPrompt}`
+}
 
 export const codePrompt = `
 You are a code generator that creates self-contained, executable code snippets. When writing code:
@@ -91,7 +91,7 @@ You are a code generator that creates self-contained, executable code snippets. 
 7. Don't use interactive input functions
 8. Don't access files or network resources
 9. Don't use infinite loops
-`;
+`
 
 export const sheetPrompt = `
 You are a spreadsheet creation assistant. Create a spreadsheet in CSV format based on the given prompt.
@@ -101,22 +101,19 @@ Requirements:
 - Include realistic sample data
 - Format numbers and dates consistently
 - Keep the data well-structured and meaningful
-`;
+`
 
-export const updateDocumentPrompt = (
-  currentContent: string | null,
-  type: ArtifactKind
-) => {
+export const updateDocumentPrompt = (currentContent: string | null, type: ArtifactKind) => {
   const mediaTypes: Record<string, string> = {
-    code: "script",
-    sheet: "spreadsheet",
-  };
-  const mediaType = mediaTypes[type] ?? "document";
+    code: 'script',
+    sheet: 'spreadsheet',
+  }
+  const mediaType = mediaTypes[type] ?? 'document'
 
   return `Rewrite the following ${mediaType} based on the given prompt.
 
-${currentContent}`;
-};
+${currentContent}`
+}
 
 export const titlePrompt = `Generate a short chat title (2-5 words) summarizing the user's message.
 
@@ -128,4 +125,4 @@ Examples:
 - "hi" → New Conversation
 - "debug my python code" → Python Debugging
 
-Never output hashtags, prefixes like "Title:", or quotes.`;
+Never output hashtags, prefixes like "Title:", or quotes.`

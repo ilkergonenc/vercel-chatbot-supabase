@@ -1,71 +1,66 @@
-import type { Page } from "@playwright/test";
+import type { Page } from '@playwright/test'
 
-const MODEL_BUTTON_REGEX = /GPT|o4-mini/i;
+const MODEL_BUTTON_REGEX = /GPT|o4-mini/i
 
 export class ChatPage {
-  page: Page;
+  page: Page
 
   constructor(page: Page) {
-    this.page = page;
+    this.page = page
   }
 
   async goto() {
-    await this.page.goto("/");
+    await this.page.goto('/')
   }
 
   async createNewChat() {
-    await this.page.goto("/");
-    await this.page.waitForSelector("[data-testid='multimodal-input']");
+    await this.page.goto('/')
+    await this.page.waitForSelector("[data-testid='multimodal-input']")
   }
 
   getInput() {
-    return this.page.getByTestId("multimodal-input");
+    return this.page.getByTestId('multimodal-input')
   }
 
   async typeMessage(message: string) {
-    const input = this.getInput();
-    await input.fill(message);
+    const input = this.getInput()
+    await input.fill(message)
   }
 
   async sendMessage() {
-    await this.page.getByTestId("send-button").click();
+    await this.page.getByTestId('send-button').click()
   }
 
   async sendUserMessage(message: string) {
-    await this.typeMessage(message);
-    await this.sendMessage();
+    await this.typeMessage(message)
+    await this.sendMessage()
   }
 
   getSendButton() {
-    return this.page.getByTestId("send-button");
+    return this.page.getByTestId('send-button')
   }
 
   getStopButton() {
-    return this.page.getByTestId("stop-button");
+    return this.page.getByTestId('stop-button')
   }
 
   async clickSuggestedAction(index = 0) {
-    const suggestions = this.page.locator(
-      "[data-testid='suggested-actions'] button"
-    );
-    await suggestions.nth(index).click();
+    const suggestions = this.page.locator("[data-testid='suggested-actions'] button")
+    await suggestions.nth(index).click()
   }
 
   async openModelSelector() {
-    const modelButton = this.page
-      .locator("button")
-      .filter({ hasText: MODEL_BUTTON_REGEX })
-      .first();
-    await modelButton.click();
+    const modelButton = this.page.locator('button').filter({ hasText: MODEL_BUTTON_REGEX }).first()
+    await modelButton.click()
   }
 
   async selectModel(modelName: string) {
-    await this.openModelSelector();
-    await this.page.getByText(modelName).first().click();
+    await this.openModelSelector()
+    await this.page.getByText(modelName).first().click()
   }
 
   async searchModels(query: string) {
-    await this.openModelSelector();
-    await this.page.getByPlaceholder("Search models...").fill(query);
+    await this.openModelSelector()
+    await this.page.getByPlaceholder('Search models...').fill(query)
   }
 }

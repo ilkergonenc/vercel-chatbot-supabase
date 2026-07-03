@@ -1,11 +1,7 @@
-import { toast } from "sonner";
-import { CodeEditor } from "@/components/chat/code-editor";
-import {
-  Console,
-  type ConsoleOutput,
-  type ConsoleOutputContent,
-} from "@/components/chat/console";
-import { Artifact } from "@/components/chat/create-artifact";
+import { toast } from 'sonner'
+import { CodeEditor } from '@/components/chat/code-editor'
+import { Console, type ConsoleOutput, type ConsoleOutputContent } from '@/components/chat/console'
+import { Artifact } from '@/components/chat/create-artifact'
 import {
   CopyIcon,
   LogsIcon,
@@ -13,8 +9,8 @@ import {
   PlayIcon,
   RedoIcon,
   UndoIcon,
-} from "@/components/chat/icons";
-import { generateUUID } from "@/lib/utils";
+} from '@/components/chat/icons'
+import { generateUUID } from '@/lib/utils'
 
 const OUTPUT_HANDLERS = {
   matplotlib: `
@@ -50,44 +46,43 @@ const OUTPUT_HANDLERS = {
   basic: `
     # Basic output capture setup
   `,
-};
+}
 
 function detectRequiredHandlers(code: string): string[] {
-  const handlers: string[] = ["basic"];
+  const handlers: string[] = ['basic']
 
-  if (code.includes("matplotlib") || code.includes("plt.")) {
-    handlers.push("matplotlib");
+  if (code.includes('matplotlib') || code.includes('plt.')) {
+    handlers.push('matplotlib')
   }
 
-  return handlers;
+  return handlers
 }
 
 type Metadata = {
-  outputs: ConsoleOutput[];
-};
+  outputs: ConsoleOutput[]
+}
 
-export const codeArtifact = new Artifact<"code", Metadata>({
-  kind: "code",
-  description:
-    "Useful for code generation; Code execution is only available for python code.",
+export const codeArtifact = new Artifact<'code', Metadata>({
+  kind: 'code',
+  description: 'Useful for code generation; Code execution is only available for python code.',
   initialize: ({ setMetadata }) => {
     setMetadata({
       outputs: [],
-    });
+    })
   },
   onStreamPart: ({ streamPart, setArtifact }) => {
-    if (streamPart.type === "data-codeDelta") {
+    if (streamPart.type === 'data-codeDelta') {
       setArtifact((draftArtifact) => ({
         ...draftArtifact,
         content: streamPart.data,
         isVisible:
-          draftArtifact.status === "streaming" &&
+          draftArtifact.status === 'streaming' &&
           draftArtifact.content.length > 300 &&
           draftArtifact.content.length < 310
             ? true
             : draftArtifact.isVisible,
-        status: "streaming",
-      }));
+        status: 'streaming',
+      }))
     }
   },
   content: ({ metadata, setMetadata, ...props }) => {
@@ -104,21 +99,21 @@ export const codeArtifact = new Artifact<"code", Metadata>({
               setMetadata({
                 ...metadata,
                 outputs: [],
-              });
+              })
             }}
           />
         )}
       </>
-    );
+    )
   },
   actions: [
     {
       icon: <PlayIcon size={18} />,
-      label: "Run",
-      description: "Execute code",
+      label: 'Run',
+      description: 'Execute code',
       onClick: async ({ content, setMetadata }) => {
-        const runId = generateUUID();
-        const outputContent: ConsoleOutputContent[] = [];
+        const runId = generateUUID()
+        const outputContent: ConsoleOutputContent[] = []
 
         setMetadata((metadata) => ({
           ...metadata,
@@ -127,27 +122,25 @@ export const codeArtifact = new Artifact<"code", Metadata>({
             {
               id: runId,
               contents: [],
-              status: "in_progress",
+              status: 'in_progress',
             },
           ],
-        }));
+        }))
 
         try {
           // @ts-expect-error - loadPyodide is not defined
           const currentPyodideInstance = await globalThis.loadPyodide({
-            indexURL: "https://cdn.jsdelivr.net/pyodide/v0.23.4/full/",
-          });
+            indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.23.4/full/',
+          })
 
           currentPyodideInstance.setStdout({
             batched: (output: string) => {
               outputContent.push({
-                type: output.startsWith("data:image/png;base64")
-                  ? "image"
-                  : "text",
+                type: output.startsWith('data:image/png;base64') ? 'image' : 'text',
                 value: output,
-              });
+              })
             },
-          });
+          })
 
           await currentPyodideInstance.loadPackagesFromImports(content, {
             messageCallback: (message: string) => {
@@ -157,30 +150,28 @@ export const codeArtifact = new Artifact<"code", Metadata>({
                   ...metadata.outputs.filter((output) => output.id !== runId),
                   {
                     id: runId,
-                    contents: [{ type: "text", value: message }],
-                    status: "loading_packages",
+                    contents: [{ type: 'text', value: message }],
+                    status: 'loading_packages',
                   },
                 ],
-              }));
+              }))
             },
-          });
+          })
 
-          const requiredHandlers = detectRequiredHandlers(content);
+          const requiredHandlers = detectRequiredHandlers(content)
           for (const handler of requiredHandlers) {
             if (OUTPUT_HANDLERS[handler as keyof typeof OUTPUT_HANDLERS]) {
               await currentPyodideInstance.runPythonAsync(
-                OUTPUT_HANDLERS[handler as keyof typeof OUTPUT_HANDLERS]
-              );
+                OUTPUT_HANDLERS[handler as keyof typeof OUTPUT_HANDLERS],
+              )
 
-              if (handler === "matplotlib") {
-                await currentPyodideInstance.runPythonAsync(
-                  "setup_matplotlib_output()"
-                );
+              if (handler === 'matplotlib') {
+                await currentPyodideInstance.runPythonAsync('setup_matplotlib_output()')
               }
             }
           }
 
-          await currentPyodideInstance.runPythonAsync(content);
+          await currentPyodideInstance.runPythonAsync(content)
 
           setMetadata((metadata) => ({
             ...metadata,
@@ -189,10 +180,10 @@ export const codeArtifact = new Artifact<"code", Metadata>({
               {
                 id: runId,
                 contents: outputContent,
-                status: "completed",
+                status: 'completed',
               },
             ],
-          }));
+          }))
         } catch (error: unknown) {
           setMetadata((metadata) => ({
             ...metadata,
@@ -202,85 +193,84 @@ export const codeArtifact = new Artifact<"code", Metadata>({
                 id: runId,
                 contents: [
                   {
-                    type: "text",
-                    value:
-                      error instanceof Error ? error.message : String(error),
+                    type: 'text',
+                    value: error instanceof Error ? error.message : String(error),
                   },
                 ],
-                status: "failed",
+                status: 'failed',
               },
             ],
-          }));
+          }))
         }
       },
     },
     {
       icon: <UndoIcon size={18} />,
-      description: "View Previous version",
+      description: 'View Previous version',
       onClick: ({ handleVersionChange }) => {
-        handleVersionChange("prev");
+        handleVersionChange('prev')
       },
       isDisabled: ({ currentVersionIndex }) => {
         if (currentVersionIndex === 0) {
-          return true;
+          return true
         }
 
-        return false;
+        return false
       },
     },
     {
       icon: <RedoIcon size={18} />,
-      description: "View Next version",
+      description: 'View Next version',
       onClick: ({ handleVersionChange }) => {
-        handleVersionChange("next");
+        handleVersionChange('next')
       },
       isDisabled: ({ isCurrentVersion }) => {
         if (isCurrentVersion) {
-          return true;
+          return true
         }
 
-        return false;
+        return false
       },
     },
     {
       icon: <CopyIcon size={18} />,
-      description: "Copy code to clipboard",
+      description: 'Copy code to clipboard',
       onClick: ({ content }) => {
-        navigator.clipboard.writeText(content);
-        toast.success("Copied to clipboard!");
+        navigator.clipboard.writeText(content)
+        toast.success('Copied to clipboard!')
       },
     },
   ],
   toolbar: [
     {
       icon: <MessageIcon />,
-      description: "Add comments",
+      description: 'Add comments',
       onClick: ({ sendMessage }) => {
         sendMessage({
-          role: "user",
+          role: 'user',
           parts: [
             {
-              type: "text",
-              text: "Add comments to the code snippet for understanding",
+              type: 'text',
+              text: 'Add comments to the code snippet for understanding',
             },
           ],
-        });
+        })
       },
     },
     {
       icon: <LogsIcon />,
-      description: "Add logs",
+      description: 'Add logs',
       onClick: ({ sendMessage }) => {
         sendMessage({
-          role: "user",
+          role: 'user',
           parts: [
             {
-              type: "text",
-              text: "Add logs to the code snippet for debugging",
+              type: 'text',
+              text: 'Add logs to the code snippet for debugging',
             },
           ],
-        });
+        })
       },
     },
   ],
-});
+})
