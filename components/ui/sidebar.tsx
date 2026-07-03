@@ -283,13 +283,13 @@ function SidebarRail({ className, ...props }: React.ComponentProps<'button'>) {
         tabIndex={-1}
         onClick={toggleSidebar}
         className={cn(
-          'absolute left-3 h-[6px] w-[100vw] cursor-e-resize',
+          'absolute left-3 h-1.5 w-screen cursor-e-resize',
           isCollapsed ? 'top-0' : 'top-[calc(3.5rem-6px)] cursor-w-resize',
         )}
       />
       <div
         className={cn(
-          'pointer-events-none absolute bottom-0 left-0 w-[100vw] rounded-tl-[12px] border-t border-l border-sidebar-border opacity-0 transition-opacity duration-150 group-hover/rail:opacity-100',
+          'pointer-events-none absolute bottom-0 left-0 w-screen rounded-tl-[12px] border-t border-l border-sidebar-border opacity-0 transition-opacity duration-150 group-hover/rail:opacity-100',
           isCollapsed ? 'top-0' : 'top-14',
         )}
       />
@@ -302,7 +302,7 @@ function SidebarInset({ className, ...props }: React.ComponentProps<'main'>) {
     <main
       data-slot="sidebar-inset"
       className={cn(
-        'relative flex w-full flex-1 flex-col bg-sidebar [transform:translate3d(0,0,0)]',
+        'relative flex w-full flex-1 flex-col bg-sidebar transform-[translate3d(0,0,0)]',
         className,
       )}
       {...props}
