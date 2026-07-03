@@ -30,6 +30,7 @@ Historical migration docs may mention NextAuth, Vercel Blob, Vercel AI Gateway, 
 - Database setup: `docs/database.md`
 - Testing commands and expectations: `docs/testing.md`
 - Shared agent context: `.agents/context/project.md`
+- Repo-local skills guide: `.agents/context/skills-guide.md`
 - Safe workflow checklist: `.agents/checklists/change-safety.md`
 - Historical migration archive: `docs/migration/`
 
