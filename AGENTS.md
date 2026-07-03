@@ -20,7 +20,7 @@ Preserve current working behavior. Keep routes, UX, chat behavior, artifact beha
 - Supabase Postgres with Drizzle ORM and `postgres`
 - Redis via `REDIS_URL` for rate limiting and resumable streams
 - Playwright for browser/user-flow tests
-- Ultracite/Biome through `pnpm check` and `pnpm fix`
+- ESLint and Prettier through `pnpm lint`, `pnpm typecheck`, and `pnpm format:check`
 
 Historical migration docs may mention NextAuth, Vercel Blob, Vercel AI Gateway, Neon, or Vercel Postgres. Those are no longer the current architecture unless explicitly described as history.
 
@@ -64,8 +64,10 @@ Historical migration docs may mention NextAuth, Vercel Blob, Vercel AI Gateway, 
 ## Test and build commands
 
 - Install dependencies: `pnpm install`
-- Static checks: `pnpm check`
-- Auto-fix formatting/lint where appropriate: `pnpm fix`
+- Lint: `pnpm lint`
+- Typecheck: `pnpm typecheck`
+- Check formatting: `pnpm format:check`
+- Auto-format where appropriate: `pnpm format`
 - Generate Drizzle migrations: `pnpm db:generate`
 - Run migrations: `pnpm db:migrate` only when explicitly requested
 - Check Drizzle schema/database state: `pnpm db:check` when database env is configured

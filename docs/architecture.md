@@ -12,6 +12,7 @@ This app is a Next.js App Router chatbot based on the Vercel Chatbot template. I
 - Supabase Postgres with Drizzle ORM
 - Redis for rate limiting and resumable streams
 - Playwright for browser/user-flow tests
+- ESLint and Prettier for linting and formatting
 
 ## Important code paths
 

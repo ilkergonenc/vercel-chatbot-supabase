@@ -18,7 +18,6 @@ export default function Page() {
     { status: "idle" }
   );
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: router is a stable ref
   useEffect(() => {
     if (state.status === "user_exists") {
       toast({ type: "error", description: "Account already exists!" });
@@ -34,6 +33,7 @@ export default function Page() {
       setIsSuccessful(true);
       router.refresh();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- router is a stable ref
   }, [state.status]);
 
   const handleSubmit = (formData: FormData) => {

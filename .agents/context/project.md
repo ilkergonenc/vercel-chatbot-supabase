@@ -9,6 +9,7 @@ Current architecture:
 - Supabase Auth, Storage, and Postgres
 - Drizzle ORM as the server-side data layer
 - Redis for rate limiting and resumable streams
+- ESLint and Prettier for linting and formatting
 
 Historical migration documents are archived under `docs/migration/archive/`. Treat them as history unless a user explicitly asks to revisit a migration decision.
 

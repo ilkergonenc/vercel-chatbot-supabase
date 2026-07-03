@@ -86,7 +86,7 @@ for runtime if using a transaction pooler URL.
 ## Verification commands
 
 - `pnpm db:migrate`
-- `pnpm check`
+- `pnpm lint` and `pnpm typecheck`
 - `pnpm build`
 - PowerShell E2E: `$env:PLAYWRIGHT='True'; pnpm exec playwright test`
 

@@ -28,7 +28,7 @@ Establish a known-good baseline before changing runtime behavior.
 - Run `git status --short`.
 - Inspect current environment availability without printing secrets.
 - Run `pnpm install` if dependencies are missing.
-- Run `pnpm check`.
+- Run `pnpm lint` and `pnpm typecheck`.
 - Run `pnpm db:check` if the database env is available and the command can connect safely.
 - Run `pnpm build` if required env vars are available.
 - Run Playwright with the current test setup if services and env vars are available.
@@ -48,7 +48,7 @@ Current app may need:
 ### Verification checklist
 
 - [ ] `git status --short` reviewed.
-- [ ] `pnpm check` result recorded.
+- [ ] `pnpm lint` and `pnpm typecheck` result recorded.
 - [ ] Optional `pnpm db:check` result recorded or skipped with reason.
 - [ ] `pnpm build` result recorded or skipped with reason.
 - [ ] Playwright result recorded or skipped with reason.
@@ -114,7 +114,7 @@ Replace Gateway model access with direct OpenAI provider usage while preserving 
 
 ### Verification checklist
 
-- [ ] `pnpm check`
+- [ ] `pnpm lint` and `pnpm typecheck`
 - [ ] `pnpm build`
 - [ ] Send a normal chat message and receive a streamed response.
 - [ ] Generate a title for a new chat.
@@ -173,7 +173,7 @@ Move the existing Drizzle/Postgres data layer to Supabase Postgres without chang
 ### Verification checklist
 
 - [ ] `pnpm db:migrate` succeeds against Supabase.
-- [ ] `pnpm check`
+- [ ] `pnpm lint` and `pnpm typecheck`
 - [ ] `pnpm build`
 - [ ] Register/login still works through current auth flow.
 - [ ] Chat history save/read/delete works.
@@ -230,7 +230,7 @@ Replace Vercel Blob uploads with Supabase Storage while preserving the current a
 
 ### Verification checklist
 
-- [ ] `pnpm check`
+- [ ] `pnpm lint` and `pnpm typecheck`
 - [ ] `pnpm build`
 - [ ] Upload JPEG and PNG under 5 MB.
 - [ ] Reject unsupported type and oversized files.
@@ -302,7 +302,7 @@ Replace NextAuth credentials and guest sessions with Supabase Auth while preserv
 
 ### Verification checklist
 
-- [ ] `pnpm check`
+- [ ] `pnpm lint` and `pnpm typecheck`
 - [ ] `pnpm build`
 - [ ] Logged-out user gets intended guest or auth behavior.
 - [ ] Register works.
@@ -359,7 +359,7 @@ Final env should not include `AI_GATEWAY_API_KEY`, `BLOB_READ_WRITE_TOKEN`, or `
 
 ### Verification checklist
 
-- [ ] `pnpm check`
+- [ ] `pnpm lint` and `pnpm typecheck`
 - [ ] `pnpm build`
 - [ ] E2E tests pass or known gaps documented.
 - [ ] No runtime imports from removed packages.

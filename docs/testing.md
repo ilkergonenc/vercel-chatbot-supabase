@@ -4,8 +4,10 @@ Use the package scripts in `package.json`.
 
 ## Commands
 
-- Static checks: `pnpm check`
-- Auto-fix formatting/lint: `pnpm fix`
+- Lint: `pnpm lint`
+- Typecheck: `pnpm typecheck`
+- Check formatting: `pnpm format:check`
+- Auto-format: `pnpm format`
 - Build: `pnpm build`
 - Drizzle schema check: `pnpm db:check`
 - Playwright: `pnpm test`

@@ -19,7 +19,6 @@ export default function Page() {
     { status: "idle" }
   );
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: router is a stable ref
   useEffect(() => {
     if (state.status === "failed") {
       toast({ type: "error", description: "Invalid credentials!" });
@@ -32,6 +31,7 @@ export default function Page() {
       setIsSuccessful(true);
       router.refresh();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- router is a stable ref
   }, [state.status]);
 
   const handleSubmit = (formData: FormData) => {
